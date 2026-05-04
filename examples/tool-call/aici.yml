@@ -1,0 +1,10 @@
+version: 1
+tests:
+  - name: order-lookup-tool-call
+    mockToolCallsFile: tool-calls.json
+    expect:
+      toolCalls:
+        - name: lookup_order
+          argumentsContains:
+            - A123
+          argumentsJsonSchema: schema.json

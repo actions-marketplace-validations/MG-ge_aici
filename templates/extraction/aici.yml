@@ -1,0 +1,7 @@
+$schema: ../../schemas/aici.schema.json
+version: 1
+tests:
+  - name: invoice-extraction-schema
+    mockOutputFile: output.json
+    expect:
+      jsonSchema: schema.json

@@ -1,0 +1,9 @@
+$schema: ../../schemas/aici.schema.json
+version: 1
+tests:
+  - name: support-intent-classifier
+    mockOutput: '{"intent":"refund","confidence":0.92}'
+    expect:
+      jsonSchema: schema.json
+      contains:
+        - refund

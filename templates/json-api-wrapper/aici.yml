@@ -1,0 +1,9 @@
+$schema: ../../schemas/aici.schema.json
+version: 1
+tests:
+  - name: api-safe-json-response
+    mockOutputFile: output.json
+    expect:
+      jsonSchema: schema.json
+      contains:
+        - '"status": "ok"'

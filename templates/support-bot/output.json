@@ -1,0 +1,5 @@
+{
+  "decision": "approved",
+  "reason": "The request is within the 30-day refund window.",
+  "next_step": "Ask the customer to confirm the original payment method."
+}

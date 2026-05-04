@@ -1,0 +1,4 @@
+node_modules/
+dist/
+.aici/
+npm-debug.log*

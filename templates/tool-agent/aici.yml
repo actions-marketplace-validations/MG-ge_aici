@@ -1,0 +1,9 @@
+$schema: ../../schemas/aici.schema.json
+version: 1
+tests:
+  - name: crm-lookup-tool-call
+    mockToolCallsFile: tool-calls.json
+    expect:
+      toolCalls:
+        - name: lookup_customer
+          argumentsJsonSchema: lookup-customer.parameters.json

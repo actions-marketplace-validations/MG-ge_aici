@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["invoice_id", "total_eur", "due_date"],
+  "additionalProperties": false,
+  "properties": {
+    "invoice_id": {
+      "type": "string"
+    },
+    "total_eur": {
+      "type": "number",
+      "minimum": 0
+    },
+    "due_date": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    }
+  }
+}

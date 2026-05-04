@@ -1,0 +1,141 @@
+# AI Quality Gate
+
+> CI for LLM apps: test prompts, structured outputs, tool calls, cost, and latency before deploy.
+
+**Status:** V1 release candidate  
+**Last updated:** 2026-05-05  
+**Owner:** MG
+
+---
+
+## Strategic Frame
+
+AI Quality Gate is a no-calls, self-serve developer tool. It should be bought and adopted like a CI utility, not sold like an enterprise governance platform.
+
+The product promise:
+
+> Catch LLM regressions before deploy.
+
+The first product surface is:
+
+- open-source CLI
+- GitHub Action
+- YAML test cases
+- Markdown/HTML reports
+- optional hosted history later
+
+This is one product, not five separate tools. Structured output tests, cost guards, eval templates, and synthetic edge cases are features inside the same release-gate workflow.
+
+---
+
+## MVP Scaffold
+
+The current scaffold includes a TypeScript CLI that can validate config and run deterministic checks against fixture outputs.
+
+```bash
+npm install
+npm run verify
+npm run check
+npm run build
+npm run sample
+npm run sample:root
+npm run sample:tool
+npm run validate:openai
+npm run validate:openai-tool
+```
+
+Sample command:
+
+```bash
+npm run dev -- run --config examples/basic/aici.yml
+```
+
+The sample writes reports to `.aici/aici-report.md`, `.aici/aici-report.json`, and `.aici/aici-report.html`.
+
+Failure-path sample:
+
+```bash
+npm run sample:fail
+```
+
+This should exit non-zero and show a JSON Schema failure.
+
+Tool-call sample:
+
+```bash
+npm run sample:tool
+```
+
+This validates a normalized tool/function call and its arguments against JSON Schema.
+
+Live provider example:
+
+```bash
+OPENAI_API_KEY=... npm run dev -- run --config examples/openai/aici.yml
+```
+
+Live tool-call example:
+
+```bash
+OPENAI_API_KEY=... npm run dev -- run --config examples/openai-tool-call/aici.yml
+```
+
+The default sample stays provider-free so CI and local checks remain deterministic.
+
+Config schema:
+
+```bash
+npm run schema
+```
+
+Use `schemas/aici.schema.json` for editor validation.
+
+GitHub Actions:
+
+```yaml
+name: AI Quality Gate
+
+on:
+  pull_request:
+
+jobs:
+  aici:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: ./
+        with:
+          config: aici.yml
+          pr-comment: true
+```
+
+---
+
+## Documents
+
+| # | Document | Description |
+|---|---|---|
+| 01 | [Product Strategy](./01-product-strategy.md) | Positioning, category, wedge, and what not to build |
+| 02 | [PRD](./02-prd.md) | Product requirements and v1 scope |
+| 03 | [Technical Architecture](./03-technical-architecture.md) | CLI, config, checks, providers, reports, and hosted path |
+| 04 | [Business & Pricing](./04-business-pricing.md) | Pricing, packaging, and commercial model |
+| 05 | [Implementation Plan](./05-implementation-plan.md) | Workstreams, acceptance criteria, and sequencing |
+| 06 | [Roadmap](./06-roadmap.md) | 30/60/90-day roadmap and launch plan |
+
+## Technical Docs
+
+| Document | Description |
+|---|---|
+| [Config Reference](./docs/config-reference.md) | `aici.yml` fields, providers, and checks |
+| [Quickstart](./docs/quickstart.md) | Five-minute local and GitHub Action setup |
+| [GitHub Action](./docs/github-action.md) | Action inputs, PR comments, and workflow setup |
+| [Security](./docs/security.md) | Redaction, secrets, and CI artifact guidance |
+| [Release Checklist](./docs/release-checklist.md) | Checks before publishing v1 |

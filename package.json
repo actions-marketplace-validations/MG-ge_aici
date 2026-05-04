@@ -1,0 +1,60 @@
+{
+  "name": "aici",
+  "version": "0.1.0",
+  "description": "CI for LLM apps: test prompts, structured outputs, tool calls, cost, and latency before deploy.",
+  "type": "module",
+  "keywords": [
+    "llm",
+    "evals",
+    "ai",
+    "ci",
+    "github-action",
+    "prompt-testing",
+    "tool-calling"
+  ],
+  "files": [
+    "dist",
+    "schemas",
+    "templates",
+    "examples",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "action.yml"
+  ],
+  "bin": {
+    "aici": "./dist/cli.js"
+  },
+  "scripts": {
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "build": "npm run clean && tsc -p tsconfig.build.json",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test --import tsx src/**/*.test.ts",
+    "verify": "npm run check && npm run test && npm run build && npm run sample && npm run sample:root && npm run sample:tool && npm run sample:templates && npm run validate:openai && npm run validate:openai-tool && npm run schema:check && npm run sample:fail:expected",
+    "dev": "tsx src/cli.ts",
+    "sample": "tsx src/cli.ts run --config examples/basic/aici.yml",
+    "sample:root": "tsx src/cli.ts run --config aici.yml",
+    "sample:tool": "tsx src/cli.ts run --config examples/tool-call/aici.yml",
+    "sample:templates": "set -e; for file in templates/*/aici.yml; do tsx src/cli.ts run --config \"$file\" --report-dir .aici/templates/$(basename \"$(dirname \"$file\")\"); done",
+    "sample:fail": "tsx src/cli.ts run --config examples/failing/aici.yml",
+    "sample:fail:expected": "tsx src/cli.ts run --config examples/failing/aici.yml; test $? -eq 1",
+    "validate:openai": "tsx src/cli.ts validate --config examples/openai/aici.yml",
+    "validate:openai-tool": "tsx src/cli.ts validate --config examples/openai-tool-call/aici.yml",
+    "schema": "tsx src/cli.ts schema",
+    "schema:check": "node --input-type=module -e \"import fs from 'node:fs/promises'; import { AICI_CONFIG_SCHEMA } from './dist/schema.js'; const file = JSON.parse(await fs.readFile('schemas/aici.schema.json', 'utf8')); if (JSON.stringify(file) !== JSON.stringify(AICI_CONFIG_SCHEMA)) { console.error('schemas/aici.schema.json is out of sync with src/schema.ts'); process.exit(1); }\""
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

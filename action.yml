@@ -1,0 +1,120 @@
+name: AI Quality Gate
+description: Run LLM regression tests and fail pull requests when AI behavior regresses.
+
+inputs:
+  config:
+    description: Path to the aici config file.
+    required: false
+    default: aici.yml
+  report-dir:
+    description: Directory for Markdown and JSON reports.
+    required: false
+    default: .aici
+  install:
+    description: Run npm ci before executing the CLI.
+    required: false
+    default: "true"
+  build:
+    description: Run npm run build before executing the CLI.
+    required: false
+    default: "true"
+  comment:
+    description: Add the Markdown report to the GitHub job summary.
+    required: false
+    default: "true"
+  pr-comment:
+    description: Add or update a sticky pull-request comment with the Markdown report.
+    required: false
+    default: "false"
+  upload-artifact:
+    description: Upload Markdown and JSON reports as a workflow artifact.
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Install dependencies
+      if: ${{ inputs.install == 'true' }}
+      shell: bash
+      run: npm ci
+
+    - name: Build CLI
+      if: ${{ inputs.build == 'true' }}
+      shell: bash
+      run: npm run build
+
+    - name: Run AI Quality Gate
+      shell: bash
+      run: |
+        set +e
+        node dist/cli.js run --config "${{ inputs.config }}" --report-dir "${{ inputs.report-dir }}"
+        status=$?
+        echo "$status" > "${{ inputs.report-dir }}/exit-code"
+
+        if [ "${{ inputs.comment }}" = "true" ] && [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+          {
+            echo "## AI Quality Gate"
+            echo
+            if [ -f "${{ inputs.report-dir }}/aici-report.md" ]; then
+              cat "${{ inputs.report-dir }}/aici-report.md"
+            else
+              echo "Report not found."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+        fi
+
+        exit 0
+
+    - name: Upload AI Quality Gate reports
+      if: ${{ always() && inputs.upload-artifact == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: aici-report
+        path: ${{ inputs.report-dir }}
+
+    - name: Update pull request comment
+      if: ${{ always() && inputs.pr-comment == 'true' && github.event_name == 'pull_request' }}
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        marker="<!-- aici-report -->"
+        report_file="${{ inputs.report-dir }}/aici-report.md"
+
+        if [ ! -f "$report_file" ]; then
+          echo "Report not found; skipping PR comment."
+          exit 0
+        fi
+
+        body_file="$(mktemp)"
+        {
+          echo "$marker"
+          echo
+          cat "$report_file"
+        } > "$body_file"
+
+        comments="$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" --paginate)"
+        comment_id="$(echo "$comments" | jq -r ".[] | select(.user.type == \"Bot\" and (.body | contains(\"$marker\"))) | .id" | head -n 1)"
+
+        if [ -n "$comment_id" ] && [ "$comment_id" != "null" ]; then
+          gh api \
+            --method PATCH \
+            "repos/${{ github.repository }}/issues/comments/$comment_id" \
+            --field body="$(cat "$body_file")" >/dev/null
+        else
+          gh api \
+            --method POST \
+            "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            --field body="$(cat "$body_file")" >/dev/null
+        fi
+
+    - name: Fail workflow on AI regression
+      if: ${{ always() }}
+      shell: bash
+      run: |
+        if [ -f "${{ inputs.report-dir }}/exit-code" ]; then
+          exit "$(cat "${{ inputs.report-dir }}/exit-code")"
+        fi
+
+        exit 1

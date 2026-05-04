@@ -1,0 +1,9 @@
+[
+  {
+    "name": "lookup_order",
+    "arguments": {
+      "order_id": "A123",
+      "include_refunds": true
+    }
+  }
+]

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>AI Quality Gate</title>
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #5b6472;
+      --paper: #f6efe4;
+      --panel: #fffaf0;
+      --line: #ded5c5;
+      --accent: #1f4e79;
+      --accent-2: #a35529;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 12% 18%, rgba(31, 78, 121, 0.18), transparent 28rem),
+        radial-gradient(circle at 88% 4%, rgba(163, 85, 41, 0.18), transparent 24rem),
+        linear-gradient(135deg, #f7f1e8 0%, #ece0cf 100%);
+      font: 16px/1.55 ui-sans-serif, "Avenir Next", "Segoe UI", sans-serif;
+    }
+    main { max-width: 1160px; margin: 0 auto; padding: 72px 24px; }
+    .hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr); gap: 28px; align-items: center; }
+    h1 { margin: 0; font-size: clamp(48px, 8vw, 96px); letter-spacing: -0.075em; line-height: 0.9; }
+    .eyebrow { color: var(--accent-2); font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+    .lede { max-width: 720px; color: var(--muted); font-size: clamp(19px, 2vw, 24px); }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 30px;
+      box-shadow: 0 24px 90px rgba(54, 43, 29, 0.13);
+      padding: 28px;
+    }
+    pre { overflow-x: auto; margin: 0; color: #e8f0ff; background: #10151f; border-radius: 20px; padding: 22px; }
+    code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 14px; }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 12px 18px;
+      color: white;
+      background: var(--accent);
+      text-decoration: none;
+      font-weight: 800;
+    }
+    .button.secondary { color: var(--ink); background: transparent; border: 1px solid var(--line); }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+    .card { background: rgba(255, 250, 240, 0.72); border: 1px solid var(--line); border-radius: 24px; padding: 22px; }
+    .card h2 { margin: 0 0 8px; font-size: 20px; }
+    .card p { margin: 0; color: var(--muted); }
+    @media (max-width: 860px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+      main { padding-top: 44px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div>
+        <p class="eyebrow">CI for LLM apps</p>
+        <h1>Catch AI regressions before deploy.</h1>
+        <p class="lede">Test prompts, structured outputs, tool calls, cost, and latency in pull requests. Local-first, provider-light, and built for solo teams that need reliable AI releases.</p>
+        <div class="actions">
+          <a class="button" href="../docs/quickstart.md">Read Quickstart</a>
+          <a class="button secondary" href="../README.md">View README</a>
+        </div>
+      </div>
+      <div class="panel">
+        <pre><code>version: 1
+tests:
+  - name: refund-policy-json
+    mockOutputFile: output.json
+    expect:
+      jsonSchema: schema.json
+      maxLatencyMs: 1000</code></pre>
+      </div>
+    </section>
+    <section class="grid">
+      <article class="card">
+        <h2>Structured Output</h2>
+        <p>Fail builds when JSON output breaks API contracts or schema guarantees.</p>
+      </article>
+      <article class="card">
+        <h2>Tool Calls</h2>
+        <p>Normalize and validate function calls across Responses and chat-completions providers.</p>
+      </article>
+      <article class="card">
+        <h2>Release Evidence</h2>
+        <p>Generate Markdown, JSON, and HTML artifacts for PRs and audit trails.</p>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

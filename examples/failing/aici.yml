@@ -1,0 +1,9 @@
+version: 1
+tests:
+  - name: invalid-support-response
+    mockOutputFile: output.json
+    expect:
+      contains:
+        - approved
+      jsonSchema: schema.json
+      maxLatencyMs: 1000

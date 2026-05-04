@@ -1,0 +1,18 @@
+$schema: ./schemas/aici.schema.json
+version: 1
+tests:
+  - name: support-response-schema
+    mockOutputFile: examples/basic/output.json
+    expect:
+      contains:
+        - approved
+      jsonSchema: examples/basic/schema.json
+      maxLatencyMs: 1000
+  - name: order-lookup-tool-call
+    mockToolCallsFile: examples/tool-call/tool-calls.json
+    expect:
+      toolCalls:
+        - name: lookup_order
+          argumentsContains:
+            - A123
+          argumentsJsonSchema: examples/tool-call/schema.json

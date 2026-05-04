@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["decision", "reason", "next_step"],
+  "additionalProperties": false,
+  "properties": {
+    "decision": {
+      "enum": ["approved", "denied", "needs_review"]
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 10
+    },
+    "next_step": {
+      "type": "string",
+      "minLength": 10
+    }
+  }
+}
