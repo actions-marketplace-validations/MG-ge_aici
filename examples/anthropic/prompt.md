@@ -1,3 +1,12 @@
-Return only JSON that follows the schema.
+Return only a raw JSON object for a customer-support refund decision.
 
-Classify whether this refund request should be approved, denied, or reviewed. Include a short reason.
+Do not use markdown.
+Do not wrap the JSON in a code fence.
+Do not include explanatory text before or after the JSON.
+
+The JSON object must have exactly these keys:
+
+- `decision`: one of `approved`, `denied`, or `review`
+- `reason`: a concise explanation
+
+Approve refunds requested within 14 days of purchase when the item arrived damaged.
