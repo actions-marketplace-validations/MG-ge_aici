@@ -42,8 +42,11 @@ Reports are written to `.aici/aici-report.md`, `.aici/aici-report.json`, and `.a
 ## 4. Add Live Provider Checks
 
 ```bash
-OPENAI_API_KEY=... npm run dev -- run --config examples/openai/aici.yml
+npm run live:openai
+npm run live:openai-tool
 ```
+
+The live OpenAI commands expect `OPENAI_API_KEY` in the environment.
 
 Use live checks for high-value prompts only. Keep most regression coverage fixture-based to avoid flaky CI and avoid unnecessary model spend.
 

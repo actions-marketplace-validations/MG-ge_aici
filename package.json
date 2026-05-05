@@ -43,6 +43,8 @@
     "validate:openai-tool": "tsx src/cli.ts validate --config examples/openai-tool-call/aici.yml",
     "validate:anthropic": "tsx src/cli.ts validate --config examples/anthropic/aici.yml",
     "validate:anthropic-tool": "tsx src/cli.ts validate --config examples/anthropic-tool-call/aici.yml",
+    "live:openai": "tsx src/cli.ts run --config examples/openai/aici.yml",
+    "live:openai-tool": "tsx src/cli.ts run --config examples/openai-tool-call/aici.yml",
     "live:anthropic": "tsx src/cli.ts run --config examples/anthropic/aici.yml",
     "live:anthropic-tool": "tsx src/cli.ts run --config examples/anthropic-tool-call/aici.yml",
     "schema": "tsx src/cli.ts schema",

@@ -73,13 +73,13 @@ This validates a normalized tool/function call and its arguments against JSON Sc
 Live provider example:
 
 ```bash
-OPENAI_API_KEY=... npm run dev -- run --config examples/openai/aici.yml
+npm run live:openai
 ```
 
 Live tool-call example:
 
 ```bash
-OPENAI_API_KEY=... npm run dev -- run --config examples/openai-tool-call/aici.yml
+npm run live:openai-tool
 ```
 
 Live Claude examples:
@@ -88,6 +88,8 @@ Live Claude examples:
 ANTHROPIC_API_KEY=... npm run live:anthropic
 ANTHROPIC_API_KEY=... npm run live:anthropic-tool
 ```
+
+Live provider scripts expect `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the environment.
 
 The default sample stays provider-free so CI and local checks remain deterministic.
 

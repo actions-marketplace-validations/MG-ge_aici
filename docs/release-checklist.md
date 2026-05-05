@@ -9,6 +9,9 @@
 - Verify the GitHub Action in a real pull request.
 - Verify one live OpenAI text-output test.
 - Verify one live OpenAI tool-call test.
+- Verify one live Anthropic text-output test.
+- Verify one live Anthropic tool-call test.
+- Run the Codex Security scan checklist for CLI, GitHub Action, reports, and static frontend.
 - Review `.aici/aici-report.json` for redaction behavior.
 - Confirm README, quickstart, config reference, and changelog are current.
 
