@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { resolveConfigFile } from "./paths.js";
 import type { AiciProvider, AiciTest, AiciToolChoice, AiciToolDefinition, ToolCall } from "./types.js";
 
 export type ProviderCall = {
@@ -432,7 +432,7 @@ async function resolveTools(test: AiciTest, rootDir: string): Promise<ResolvedTo
 
 async function resolveToolParameters(tool: AiciToolDefinition, rootDir: string): Promise<unknown> {
   if (typeof tool.parametersFile === "string") {
-    return JSON.parse(await readFile(path.resolve(rootDir, tool.parametersFile), "utf8")) as unknown;
+    return JSON.parse(await readFile(resolveConfigFile(rootDir, tool.parametersFile, `Tool "${tool.name}" parametersFile`), "utf8")) as unknown;
   }
 
   return tool.parameters;

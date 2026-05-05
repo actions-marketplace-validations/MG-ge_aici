@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
-import path from "node:path";
 import { Ajv2020, type AnySchema } from "ajv/dist/2020.js";
+import { resolveConfigFile } from "./paths.js";
 import { callProvider } from "./providers.js";
 import type { AiciConfig, AiciExpect, AiciTest, CheckResult, TestResult, ToolCall, ToolCallExpectation } from "./types.js";
 
@@ -59,7 +59,7 @@ async function executeTest(
 
   if (typeof test.mockOutputFile === "string") {
     return {
-      output: await readFile(path.resolve(rootDir, test.mockOutputFile), "utf8"),
+      output: await readFile(resolveConfigFile(rootDir, test.mockOutputFile, `Test "${test.name}" mockOutputFile`), "utf8"),
       toolCalls: await resolveMockToolCalls(test, rootDir),
       latencyMs: Math.round(performance.now() - startedAt),
     };
@@ -89,7 +89,7 @@ async function resolveMockToolCalls(test: AiciTest, rootDir: string): Promise<To
   }
 
   if (typeof test.mockToolCallsFile === "string") {
-    const raw = await readFile(path.resolve(rootDir, test.mockToolCallsFile), "utf8");
+    const raw = await readFile(resolveConfigFile(rootDir, test.mockToolCallsFile, `Test "${test.name}" mockToolCallsFile`), "utf8");
     const parsed = JSON.parse(raw) as unknown;
 
     if (!Array.isArray(parsed)) {
@@ -110,7 +110,7 @@ async function resolvePrompt(test: AiciTest, rootDir: string): Promise<string> {
   }
 
   if (typeof test.promptFile === "string") {
-    promptParts.push(await readFile(path.resolve(rootDir, test.promptFile), "utf8"));
+    promptParts.push(await readFile(resolveConfigFile(rootDir, test.promptFile, `Test "${test.name}" promptFile`), "utf8"));
   }
 
   if (typeof test.input === "string") {
@@ -118,7 +118,7 @@ async function resolvePrompt(test: AiciTest, rootDir: string): Promise<string> {
   }
 
   if (typeof test.inputFile === "string") {
-    promptParts.push(await readFile(path.resolve(rootDir, test.inputFile), "utf8"));
+    promptParts.push(await readFile(resolveConfigFile(rootDir, test.inputFile, `Test "${test.name}" inputFile`), "utf8"));
   }
 
   if (promptParts.length === 0) {
@@ -170,7 +170,7 @@ async function runChecks(
     });
 
     if (parsed.ok && expect.jsonSchema) {
-      const schemaPath = path.resolve(rootDir, expect.jsonSchema);
+      const schemaPath = resolveConfigFile(rootDir, expect.jsonSchema, "expect.jsonSchema");
       const schema = JSON.parse(await readFile(schemaPath, "utf8")) as AnySchema;
       const ajv = new Ajv2020({ allErrors: true });
       const validate = ajv.compile(schema);
@@ -269,7 +269,7 @@ async function checkToolCall(
   }
 
   if (expectation.argumentsJsonSchema) {
-    const schemaPath = path.resolve(rootDir, expectation.argumentsJsonSchema);
+    const schemaPath = resolveConfigFile(rootDir, expectation.argumentsJsonSchema, "toolCalls.argumentsJsonSchema");
     const schema = JSON.parse(await readFile(schemaPath, "utf8")) as AnySchema;
     const ajv = new Ajv2020({ allErrors: true });
     const validate = ajv.compile(schema);

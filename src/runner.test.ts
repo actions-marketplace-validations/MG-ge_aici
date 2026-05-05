@@ -47,3 +47,16 @@ test("missing provider is reported as execution failure", async () => {
   assert.equal(result.passed, false);
   assert.equal(result.results[0]?.checks[0]?.name, "execution");
 });
+
+test("config file references cannot escape config directory", async () => {
+  const result = await runConfig(
+    {
+      version: 1,
+      tests: [{ name: "path-escape", mockOutputFile: "../../package.json" }],
+    },
+    path.resolve("examples/basic"),
+  );
+
+  assert.equal(result.passed, false);
+  assert.match(result.results[0]?.checks[0]?.message ?? "", /inside the config directory/u);
+});

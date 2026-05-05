@@ -46,18 +46,23 @@ runs:
 
     - name: Run AI Quality Gate
       shell: bash
+      env:
+        AICI_CONFIG: ${{ inputs.config }}
+        AICI_REPORT_DIR: ${{ inputs.report-dir }}
+        AICI_COMMENT: ${{ inputs.comment }}
       run: |
         set +e
-        node dist/cli.js run --config "${{ inputs.config }}" --report-dir "${{ inputs.report-dir }}"
+        mkdir -p -- "$AICI_REPORT_DIR"
+        node dist/cli.js run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR"
         status=$?
-        echo "$status" > "${{ inputs.report-dir }}/exit-code"
+        echo "$status" > "$AICI_REPORT_DIR/exit-code"
 
-        if [ "${{ inputs.comment }}" = "true" ] && [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
+        if [ "$AICI_COMMENT" = "true" ] && [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
           {
             echo "## AI Quality Gate"
             echo
-            if [ -f "${{ inputs.report-dir }}/aici-report.md" ]; then
-              cat "${{ inputs.report-dir }}/aici-report.md"
+            if [ -f "$AICI_REPORT_DIR/aici-report.md" ]; then
+              cat -- "$AICI_REPORT_DIR/aici-report.md"
             else
               echo "Report not found."
             fi
@@ -78,9 +83,12 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        AICI_REPORT_DIR: ${{ inputs.report-dir }}
+        AICI_REPOSITORY: ${{ github.repository }}
+        AICI_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
       run: |
         marker="<!-- aici-report -->"
-        report_file="${{ inputs.report-dir }}/aici-report.md"
+        report_file="$AICI_REPORT_DIR/aici-report.md"
 
         if [ ! -f "$report_file" ]; then
           echo "Report not found; skipping PR comment."
@@ -91,30 +99,32 @@ runs:
         {
           echo "$marker"
           echo
-          cat "$report_file"
+          cat -- "$report_file"
         } > "$body_file"
 
-        comments="$(gh api "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" --paginate)"
+        comments="$(gh api "repos/$AICI_REPOSITORY/issues/$AICI_PULL_REQUEST_NUMBER/comments" --paginate)"
         comment_id="$(echo "$comments" | jq -r ".[] | select(.user.type == \"Bot\" and (.body | contains(\"$marker\"))) | .id" | head -n 1)"
 
         if [ -n "$comment_id" ] && [ "$comment_id" != "null" ]; then
           gh api \
             --method PATCH \
-            "repos/${{ github.repository }}/issues/comments/$comment_id" \
+            "repos/$AICI_REPOSITORY/issues/comments/$comment_id" \
             --field body="$(cat "$body_file")" >/dev/null
         else
           gh api \
             --method POST \
-            "repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
+            "repos/$AICI_REPOSITORY/issues/$AICI_PULL_REQUEST_NUMBER/comments" \
             --field body="$(cat "$body_file")" >/dev/null
         fi
 
     - name: Fail workflow on AI regression
       if: ${{ always() }}
       shell: bash
+      env:
+        AICI_REPORT_DIR: ${{ inputs.report-dir }}
       run: |
-        if [ -f "${{ inputs.report-dir }}/exit-code" ]; then
-          exit "$(cat "${{ inputs.report-dir }}/exit-code")"
+        if [ -f "$AICI_REPORT_DIR/exit-code" ]; then
+          exit "$(cat "$AICI_REPORT_DIR/exit-code")"
         fi
 
         exit 1

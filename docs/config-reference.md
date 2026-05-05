@@ -19,6 +19,8 @@ tests:
 
 Use `mockOutput` or `mockOutputFile` for deterministic tests and examples.
 
+All file fields are resolved relative to the config file directory and must stay inside that directory. This applies to prompt, input, mock output, mock tool-call, JSON Schema, and tool `parametersFile` references.
+
 ---
 
 ## Tool-Call Fixture Test

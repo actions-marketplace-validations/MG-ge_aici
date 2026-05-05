@@ -25,6 +25,8 @@ redact:
 
 The generated JSON report can include model output. If your prompts include sensitive customer data, add redaction entries or avoid uploading artifacts for those jobs.
 
+Config-referenced files are constrained to the config directory. Keep prompts, fixtures, schemas, and tool schemas under that directory instead of pointing configs at parent folders or machine-local files.
+
 Recommended defaults:
 
 - Use fixture outputs for broad regression coverage.
