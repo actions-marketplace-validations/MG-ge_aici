@@ -87,6 +87,46 @@ test("sends function tools to Responses API providers", async () => {
   assert.deepEqual(getPath(requestBody, ["tool_choice", "name"]), "lookup_order");
 });
 
+test("sends function tools to Anthropic Messages providers", async () => {
+  process.env.AICI_TEST_API_KEY = "test-key";
+  let requestBody: unknown;
+  let requestHeaders: Headers | undefined;
+
+  globalThis.fetch = async (_url, init) => {
+    requestBody = JSON.parse(String(init?.body)) as unknown;
+    requestHeaders = new Headers(init?.headers);
+    return jsonResponse({
+      content: [
+        {
+          type: "tool_use",
+          name: "lookup_order",
+          input: { order_id: "A123", include_refunds: true },
+        },
+      ],
+      usage: {
+        input_tokens: 12,
+        output_tokens: 8,
+      },
+    });
+  };
+
+  const result = await callProvider(
+    anthropicProvider(),
+    toolTest("anthropic-tool"),
+    "Check order A123.",
+    process.cwd(),
+  );
+
+  assert.equal(result.provider, "anthropic");
+  assert.equal(result.toolCalls?.[0]?.name, "lookup_order");
+  assert.deepEqual(result.toolCalls?.[0]?.arguments, { order_id: "A123", include_refunds: true });
+  assert.equal(requestHeaders?.get("anthropic-version"), "2023-06-01");
+  assert.deepEqual(getPath(requestBody, ["tools", 0, "name"]), "lookup_order");
+  assert.deepEqual(getPath(requestBody, ["tools", 0, "input_schema", "required", 0]), "order_id");
+  assert.deepEqual(getPath(requestBody, ["tool_choice", "type"]), "tool");
+  assert.deepEqual(getPath(requestBody, ["tool_choice", "name"]), "lookup_order");
+});
+
 function chatProvider(): AiciProvider {
   return {
     type: "openai-compatible",
@@ -103,6 +143,15 @@ function responsesProvider(): AiciProvider {
     api: "responses",
     apiKeyEnv: "AICI_TEST_API_KEY",
     model: "test-model",
+  };
+}
+
+function anthropicProvider(): AiciProvider {
+  return {
+    type: "anthropic",
+    apiKeyEnv: "AICI_TEST_API_KEY",
+    baseUrl: "https://example.test/v1",
+    model: "claude-haiku-4-5",
   };
 }
 

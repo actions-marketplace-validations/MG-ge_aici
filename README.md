@@ -42,6 +42,8 @@ npm run sample:root
 npm run sample:tool
 npm run validate:openai
 npm run validate:openai-tool
+npm run validate:anthropic
+npm run validate:anthropic-tool
 ```
 
 Sample command:
@@ -78,6 +80,13 @@ Live tool-call example:
 
 ```bash
 OPENAI_API_KEY=... npm run dev -- run --config examples/openai-tool-call/aici.yml
+```
+
+Live Claude examples:
+
+```bash
+ANTHROPIC_API_KEY=... npm run live:anthropic
+ANTHROPIC_API_KEY=... npm run live:anthropic-tool
 ```
 
 The default sample stays provider-free so CI and local checks remain deterministic.

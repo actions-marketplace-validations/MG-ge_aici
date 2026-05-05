@@ -6,11 +6,12 @@ export type AiciConfig = {
 };
 
 export type AiciProvider = {
-  type: "openai" | "openai-compatible";
+  type: "openai" | "openai-compatible" | "anthropic";
   model: string;
-  api?: "responses" | "chat-completions";
+  api?: "responses" | "chat-completions" | "messages";
   apiKeyEnv?: string;
   baseUrl?: string;
+  apiVersion?: string;
   timeoutMs?: number;
   retries?: number;
   temperature?: number;

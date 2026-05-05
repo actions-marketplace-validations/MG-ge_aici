@@ -101,8 +101,8 @@ function validateProvider(value: unknown, label: string): AiciProvider {
     throw new Error(`${label} must be an object.`);
   }
 
-  if (value.type !== "openai" && value.type !== "openai-compatible") {
-    throw new Error(`${label}.type must be "openai" or "openai-compatible".`);
+  if (value.type !== "openai" && value.type !== "openai-compatible" && value.type !== "anthropic") {
+    throw new Error(`${label}.type must be "openai", "openai-compatible", or "anthropic".`);
   }
 
   if (typeof value.model !== "string" || value.model.trim() === "") {
@@ -113,12 +113,16 @@ function validateProvider(value: unknown, label: string): AiciProvider {
     throw new Error(`${label}.apiKeyEnv must be a string.`);
   }
 
-  if (value.api !== undefined && value.api !== "responses" && value.api !== "chat-completions") {
-    throw new Error(`${label}.api must be "responses" or "chat-completions".`);
+  if (value.api !== undefined && value.api !== "responses" && value.api !== "chat-completions" && value.api !== "messages") {
+    throw new Error(`${label}.api must be "responses", "chat-completions", or "messages".`);
   }
 
   if (value.baseUrl !== undefined && typeof value.baseUrl !== "string") {
     throw new Error(`${label}.baseUrl must be a string.`);
+  }
+
+  if (value.apiVersion !== undefined && typeof value.apiVersion !== "string") {
+    throw new Error(`${label}.apiVersion must be a string.`);
   }
 
   validateOptionalNumber(value.timeoutMs, `${label}.timeoutMs`);
@@ -128,6 +132,10 @@ function validateProvider(value: unknown, label: string): AiciProvider {
 
   if (value.type === "openai-compatible" && typeof value.baseUrl !== "string") {
     throw new Error(`${label}.baseUrl is required for openai-compatible providers.`);
+  }
+
+  if (value.type === "anthropic" && value.api !== undefined && value.api !== "messages") {
+    throw new Error(`${label}.api must be "messages" for anthropic providers.`);
   }
 
   return value as AiciProvider;

@@ -83,6 +83,36 @@ OpenAI defaults to the Responses API. OpenAI-compatible providers default to cha
 
 ---
 
+## Anthropic Claude Test
+
+```yaml
+$schema: ../../schemas/aici.schema.json
+version: 1
+provider:
+  type: anthropic
+  model: claude-haiku-4-5
+  api: messages
+  apiKeyEnv: ANTHROPIC_API_KEY
+  timeoutMs: 30000
+  retries: 1
+  temperature: 0
+  maxOutputTokens: 300
+tests:
+  - name: refund-policy-json-claude
+    promptFile: prompt.md
+    inputFile: input.txt
+    expect:
+      contains:
+        - approved
+      jsonSchema: schema.json
+      maxLatencyMs: 10000
+      maxCostUsd: 0.02
+```
+
+Anthropic providers use the Messages API. Use `claude-haiku-4-5` for low-cost smoke tests, and move to Sonnet/Opus only for checks where stronger reasoning is worth the cost.
+
+---
+
 ## Live Tool-Call Test
 
 ```yaml
@@ -109,7 +139,7 @@ tests:
           argumentsJsonSchema: lookup-order.parameters.json
 ```
 
-`tools` are sent to live providers. For OpenAI Responses, tools are serialized as function tools. For OpenAI-compatible chat completions, tools are serialized in chat-completions function-tool format.
+`tools` are sent to live providers. For OpenAI Responses, tools are serialized as function tools. For OpenAI-compatible chat completions, tools are serialized in chat-completions function-tool format. For Anthropic Messages, tools are serialized with `input_schema`, and `toolChoice: required` maps to Anthropic's `any`.
 
 ---
 
@@ -117,11 +147,12 @@ tests:
 
 | Field | Required | Description |
 |---|---:|---|
-| `type` | yes | `openai` or `openai-compatible` |
+| `type` | yes | `openai`, `openai-compatible`, or `anthropic` |
 | `model` | yes | Provider model id |
-| `api` | no | `responses` or `chat-completions` |
+| `api` | no | `responses`, `chat-completions`, or `messages` |
 | `apiKeyEnv` | no | Environment variable containing API key |
-| `baseUrl` | for compatible providers | Base URL ending before `/chat/completions` |
+| `baseUrl` | for compatible providers | Base URL ending before `/responses`, `/chat/completions`, or `/messages` |
+| `apiVersion` | no | Provider API version header, currently used by Anthropic |
 | `timeoutMs` | no | Request timeout, default `30000` |
 | `retries` | no | Retry count after first failed attempt, default `1` |
 | `temperature` | no | Generation temperature, default `0` |

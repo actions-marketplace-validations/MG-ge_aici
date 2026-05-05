@@ -1,0 +1,27 @@
+$schema: ../../schemas/aici.schema.json
+version: 1
+provider:
+  type: anthropic
+  model: claude-haiku-4-5
+  api: messages
+  apiKeyEnv: ANTHROPIC_API_KEY
+  timeoutMs: 30000
+  retries: 1
+  temperature: 0
+  maxOutputTokens: 300
+tests:
+  - name: forced-order-lookup-tool-claude
+    promptFile: prompt.md
+    toolChoice:
+      name: lookup_order
+    tools:
+      - name: lookup_order
+        description: Look up an order by id before answering customer questions. Use this whenever the user asks about order status, shipping, refunds, or damage claims.
+        parametersFile: lookup-order.parameters.json
+        strict: true
+    expect:
+      toolCalls:
+        - name: lookup_order
+          argumentsJsonSchema: lookup-order.parameters.json
+      maxLatencyMs: 10000
+      maxCostUsd: 0.02

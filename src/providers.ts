@@ -55,12 +55,32 @@ type ResponsesResponse = {
   };
 };
 
+type AnthropicResponse = {
+  content?: Array<{
+    type?: string;
+    text?: string;
+    name?: string;
+    input?: unknown;
+  }>;
+  usage?: {
+    input_tokens?: number;
+    output_tokens?: number;
+  };
+};
+
 const MODEL_PRICING_USD_PER_1M_TOKENS: Record<string, { input: number; output: number }> = {
   "gpt-5.4-mini": { input: 0.15, output: 0.6 },
   "gpt-5.4": { input: 2, output: 8 },
   "gpt-5.3-mini": { input: 0.15, output: 0.6 },
   "gpt-4.1-mini": { input: 0.4, output: 1.6 },
   "gpt-4.1": { input: 2, output: 8 },
+  "claude-haiku-4-5": { input: 1, output: 5 },
+  "claude-haiku-4-5-20251001": { input: 1, output: 5 },
+  "claude-sonnet-4-5": { input: 3, output: 15 },
+  "claude-sonnet-4-5-20250929": { input: 3, output: 15 },
+  "claude-sonnet-4-6": { input: 3, output: 15 },
+  "claude-opus-4-6": { input: 5, output: 25 },
+  "claude-opus-4-7": { input: 5, output: 25 },
 };
 
 export async function callProvider(
@@ -73,7 +93,72 @@ export async function callProvider(
     return callOpenAiCompatible(provider, test, prompt, rootDir);
   }
 
+  if (provider.type === "anthropic") {
+    return callAnthropicMessages(provider, test, prompt, rootDir);
+  }
+
   throw new Error(`Unsupported provider type: ${(provider as AiciProvider).type}`);
+}
+
+async function callAnthropicMessages(
+  provider: AiciProvider,
+  test: AiciTest,
+  prompt: string,
+  rootDir: string,
+): Promise<ProviderCall> {
+  const apiKeyEnv = provider.apiKeyEnv ?? "ANTHROPIC_API_KEY";
+  const apiKey = process.env[apiKeyEnv];
+
+  if (!apiKey) {
+    throw new Error(`Missing API key env var ${apiKeyEnv} for test "${test.name}".`);
+  }
+
+  const baseUrl = stripTrailingSlash(provider.baseUrl ?? "https://api.anthropic.com/v1");
+  const startedAt = performance.now();
+  const tools = await resolveTools(test, rootDir);
+  const response = await fetchWithTimeout(`${baseUrl}/messages`, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "anthropic-version": provider.apiVersion ?? "2023-06-01",
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      model: provider.model,
+      messages: [{ role: "user", content: prompt }],
+      temperature: provider.temperature ?? 0,
+      max_tokens: provider.maxOutputTokens ?? 1024,
+      ...(tools.length > 0 ? { tools: tools.map(toAnthropicTool), tool_choice: toAnthropicToolChoice(test.toolChoice) } : {}),
+    }),
+  }, provider.timeoutMs);
+  const latencyMs = Math.round(performance.now() - startedAt);
+
+  if (!response.ok) {
+    const body = await response.text();
+    throw new Error(`Provider request failed for "${test.name}" (${response.status}): ${body}`);
+  }
+
+  const body = (await response.json()) as AnthropicResponse;
+  const output = extractAnthropicText(body);
+  const toolCalls = extractAnthropicToolCalls(body);
+
+  if (typeof output !== "string" && toolCalls.length === 0) {
+    throw new Error(`Provider response for "${test.name}" did not include text output.`);
+  }
+
+  const inputTokens = body.usage?.input_tokens;
+  const outputTokens = body.usage?.output_tokens;
+
+  return {
+    output: output ?? "",
+    latencyMs,
+    inputTokens,
+    outputTokens,
+    costUsd: estimateCost(provider.model, inputTokens, outputTokens),
+    toolCalls,
+    provider: provider.type,
+    model: provider.model,
+  };
 }
 
 async function callOpenAiCompatible(
@@ -252,6 +337,31 @@ function extractResponsesText(body: ResponsesResponse): string | undefined {
   return parts && parts.length > 0 ? parts.join("\n") : undefined;
 }
 
+function extractAnthropicText(body: AnthropicResponse): string | undefined {
+  const parts = body.content
+    ?.filter((item) => item.type === "text")
+    .map((item) => item.text)
+    .filter((text): text is string => typeof text === "string");
+
+  return parts && parts.length > 0 ? parts.join("\n") : undefined;
+}
+
+function extractAnthropicToolCalls(body: AnthropicResponse): ToolCall[] {
+  const normalized: ToolCall[] = [];
+
+  for (const item of body.content ?? []) {
+    if (item.type === "tool_use" && typeof item.name === "string" && item.name.length > 0) {
+      normalized.push({
+        name: item.name,
+        arguments: item.input,
+        raw: item,
+      });
+    }
+  }
+
+  return normalized;
+}
+
 function extractChatToolCalls(toolCalls: ChatToolCall[]): ToolCall[] {
   const normalized: ToolCall[] = [];
 
@@ -350,6 +460,15 @@ function toChatTool(tool: ResolvedTool): Record<string, unknown> {
   };
 }
 
+function toAnthropicTool(tool: ResolvedTool): Record<string, unknown> {
+  return compactObject({
+    name: tool.name,
+    description: tool.description,
+    input_schema: tool.parameters,
+    strict: tool.strict,
+  });
+}
+
 function toResponsesToolChoice(toolChoice: AiciToolChoice | undefined): unknown {
   if (!toolChoice) {
     return "auto";
@@ -379,6 +498,25 @@ function toChatToolChoice(toolChoice: AiciToolChoice | undefined): unknown {
     function: {
       name: toolChoice.name,
     },
+  };
+}
+
+function toAnthropicToolChoice(toolChoice: AiciToolChoice | undefined): unknown {
+  if (!toolChoice) {
+    return { type: "auto" };
+  }
+
+  if (toolChoice === "required") {
+    return { type: "any" };
+  }
+
+  if (typeof toolChoice === "string") {
+    return { type: toolChoice };
+  }
+
+  return {
+    type: "tool",
+    name: toolChoice.name,
   };
 }
 

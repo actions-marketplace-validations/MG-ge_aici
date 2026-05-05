@@ -36,19 +36,22 @@ export const AICI_CONFIG_SCHEMA = {
       "additionalProperties": false,
       "properties": {
         "type": {
-          "enum": ["openai", "openai-compatible"]
+          "enum": ["openai", "openai-compatible", "anthropic"]
         },
         "model": {
           "type": "string",
           "minLength": 1
         },
         "api": {
-          "enum": ["responses", "chat-completions"]
+          "enum": ["responses", "chat-completions", "messages"]
         },
         "apiKeyEnv": {
           "type": "string"
         },
         "baseUrl": {
+          "type": "string"
+        },
+        "apiVersion": {
           "type": "string"
         },
         "timeoutMs": {

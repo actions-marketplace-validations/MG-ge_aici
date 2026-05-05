@@ -3,7 +3,10 @@
   "$id": "https://ai-quality-gate.dev/schemas/aici.schema.json",
   "title": "AI Quality Gate config",
   "type": "object",
-  "required": ["version", "tests"],
+  "required": [
+    "version",
+    "tests"
+  ],
   "additionalProperties": false,
   "properties": {
     "$schema": {
@@ -32,23 +35,37 @@
   "$defs": {
     "provider": {
       "type": "object",
-      "required": ["type", "model"],
+      "required": [
+        "type",
+        "model"
+      ],
       "additionalProperties": false,
       "properties": {
         "type": {
-          "enum": ["openai", "openai-compatible"]
+          "enum": [
+            "openai",
+            "openai-compatible",
+            "anthropic"
+          ]
         },
         "model": {
           "type": "string",
           "minLength": 1
         },
         "api": {
-          "enum": ["responses", "chat-completions"]
+          "enum": [
+            "responses",
+            "chat-completions",
+            "messages"
+          ]
         },
         "apiKeyEnv": {
           "type": "string"
         },
         "baseUrl": {
+          "type": "string"
+        },
+        "apiVersion": {
           "type": "string"
         },
         "timeoutMs": {
@@ -70,7 +87,9 @@
     },
     "test": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "additionalProperties": false,
       "properties": {
         "name": {
@@ -123,7 +142,9 @@
     },
     "tool": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "additionalProperties": false,
       "properties": {
         "name": {
@@ -147,11 +168,17 @@
     "toolChoice": {
       "oneOf": [
         {
-          "enum": ["auto", "none", "required"]
+          "enum": [
+            "auto",
+            "none",
+            "required"
+          ]
         },
         {
           "type": "object",
-          "required": ["name"],
+          "required": [
+            "name"
+          ],
           "additionalProperties": false,
           "properties": {
             "name": {
@@ -164,7 +191,9 @@
     },
     "toolCall": {
       "type": "object",
-      "required": ["name"],
+      "required": [
+        "name"
+      ],
       "additionalProperties": true,
       "properties": {
         "name": {
