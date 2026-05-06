@@ -5,40 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Aici is a small CLI and GitHub Action that fails pull requests when LLM prompts, JSON output, tool calls, latency, or cost regress.">
   <link rel="icon" href="data:,">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <title>Aici - fail the PR when the LLM regresses</title>
   <style>
     :root {
       color-scheme: light;
-      --paper: #fbf8ef;
-      --paper-2: #f1ebdf;
-      --ink: #1d232d;
-      --ink-2: #4a5362;
-      --ink-3: #7b8493;
-      --line: #ddd4c5;
-      --line-2: #cfc3b3;
-      --pass: #158455;
-      --pass-soft: #e1f3e9;
-      --fail: #bf392c;
-      --fail-soft: #f8e3df;
-      --warn: #b57912;
-      --term-bg: #1b212c;
-      --term-fg: #f3efe7;
-      --term-dim: #97a1b1;
-      --highlight: #fff2c9;
-      --shadow: 0 1px 0 rgba(29, 35, 45, 0.06), 0 1px 2px rgba(29, 35, 45, 0.05);
-      --shadow-lg: 0 24px 60px rgba(29, 35, 45, 0.1), 0 2px 6px rgba(29, 35, 45, 0.04);
-      --sans: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
-      --mono: "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
+      --paper: oklch(0.985 0.004 95);
+      --paper-2: oklch(0.965 0.005 95);
+      --ink: oklch(0.20 0.012 255);
+      --ink-2: oklch(0.36 0.012 255);
+      --ink-3: oklch(0.55 0.010 255);
+      --line: oklch(0.90 0.006 95);
+      --line-2: oklch(0.85 0.008 95);
+      --pass: oklch(0.58 0.13 155);
+      --pass-soft: oklch(0.93 0.05 155);
+      --fail: oklch(0.55 0.20 25);
+      --fail-soft: oklch(0.94 0.05 25);
+      --warn: oklch(0.82 0.12 85);
+      --term-bg: oklch(0.18 0.012 255);
+      --term-fg: oklch(0.93 0.008 95);
+      --term-dim: oklch(0.62 0.012 255);
+      --highlight: oklch(0.96 0.04 95);
+      --shadow: 0 1px 0 oklch(0.90 0.006 95), 0 1px 2px oklch(0.20 0.012 255 / 0.04);
+      --shadow-lg: 0 24px 60px oklch(0.20 0.012 255 / 0.08), 0 2px 6px oklch(0.20 0.012 255 / 0.04);
+      --sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace;
     }
 
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
-      background:
-        radial-gradient(circle at 12% 12%, rgba(21, 132, 85, 0.09), transparent 28rem),
-        radial-gradient(circle at 82% 3%, rgba(191, 57, 44, 0.08), transparent 24rem),
-        var(--paper);
+      background: var(--paper);
       color: var(--ink);
       font: 17px/1.55 var(--sans);
       letter-spacing: -0.005em;
@@ -76,8 +76,9 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: rgba(251, 248, 239, 0.86);
+      background: color-mix(in oklch, var(--paper) 86%, transparent);
       backdrop-filter: blur(10px) saturate(1.1);
+      -webkit-backdrop-filter: blur(10px) saturate(1.1);
       border-bottom: 1px solid var(--line);
     }
     .topbar-inner {
@@ -168,7 +169,7 @@
       font-size: clamp(42px, 6.4vw, 76px);
       line-height: 0.98;
       letter-spacing: -0.035em;
-      font-weight: 700;
+      font-weight: 600;
     }
     h1 .strike {
       color: var(--ink-3);
@@ -180,7 +181,7 @@
     h1 em {
       color: var(--ink-2);
       font-style: normal;
-      font-weight: 600;
+      font-weight: 500;
     }
     .lede {
       max-width: 60ch;
