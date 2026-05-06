@@ -36,7 +36,7 @@ Live provider tests:
 
 - The configured prompt and input are sent to the provider.
 - Tool names, descriptions, and JSON Schemas are sent when tools are configured.
-- Provider API keys are sent only to the selected provider endpoint.
+- Provider API keys are sent only to the selected provider endpoint. `type: openai` and `type: anthropic` use the official provider endpoints; custom endpoints require `type: openai-compatible`.
 
 Aici does not proxy live provider calls through an Aici server in v0.1.
 
@@ -48,7 +48,7 @@ Aici writes reports to the configured report directory, defaulting to `.aici`:
 - `.aici/aici-report.json`
 - `.aici/aici-report.html`
 
-Reports may include test names, pass/fail status, failure messages, latency, known cost, model output, and normalized tool-call details.
+Reports may include test names, pass/fail status, failure messages, latency, known cost, model output, and normalized tool-call details. Configured redaction values are applied recursively to model output, failure messages, and tool-call details before reports are written.
 
 ## CI Artifact Risk
 
@@ -61,6 +61,7 @@ Use these defaults for sensitive workflows:
 - Disable `pr-comment` for sensitive outputs.
 - Disable artifact upload if reports may contain private data.
 - Configure `redact` for tenant ids, emails, customer ids, and known sensitive fixture values.
+- Do not run live checks with provider secrets against untrusted PR configs.
 
 ## Provider Risk
 

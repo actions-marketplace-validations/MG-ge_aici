@@ -13,8 +13,10 @@ test.afterEach(() => {
 test("sends function tools to chat completions providers", async () => {
   process.env.AICI_TEST_API_KEY = "test-key";
   let requestBody: unknown;
+  let requestUrl = "";
 
-  globalThis.fetch = async (_url, init) => {
+  globalThis.fetch = async (url, init) => {
+    requestUrl = String(url);
     requestBody = JSON.parse(String(init?.body)) as unknown;
     return jsonResponse({
       choices: [
@@ -49,6 +51,7 @@ test("sends function tools to chat completions providers", async () => {
 
   assert.equal(result.toolCalls?.[0]?.name, "lookup_order");
   assert.deepEqual(result.toolCalls?.[0]?.arguments, { order_id: "A123", include_refunds: true });
+  assert.equal(requestUrl, "https://example.test/v1/chat/completions");
   assert.deepEqual(getPath(requestBody, ["tools", 0, "function", "name"]), "lookup_order");
   assert.deepEqual(getPath(requestBody, ["tool_choice", "function", "name"]), "lookup_order");
 });
@@ -56,8 +59,10 @@ test("sends function tools to chat completions providers", async () => {
 test("sends function tools to Responses API providers", async () => {
   process.env.AICI_TEST_API_KEY = "test-key";
   let requestBody: unknown;
+  let requestUrl = "";
 
-  globalThis.fetch = async (_url, init) => {
+  globalThis.fetch = async (url, init) => {
+    requestUrl = String(url);
     requestBody = JSON.parse(String(init?.body)) as unknown;
     return jsonResponse({
       output: [
@@ -83,6 +88,7 @@ test("sends function tools to Responses API providers", async () => {
 
   assert.equal(result.toolCalls?.[0]?.name, "lookup_order");
   assert.deepEqual(result.toolCalls?.[0]?.arguments, { order_id: "A123", include_refunds: true });
+  assert.equal(requestUrl, "https://api.openai.com/v1/responses");
   assert.deepEqual(getPath(requestBody, ["tools", 0, "name"]), "lookup_order");
   assert.deepEqual(getPath(requestBody, ["tool_choice", "name"]), "lookup_order");
 });
@@ -91,8 +97,10 @@ test("sends function tools to Anthropic Messages providers", async () => {
   process.env.AICI_TEST_API_KEY = "test-key";
   let requestBody: unknown;
   let requestHeaders: Headers | undefined;
+  let requestUrl = "";
 
-  globalThis.fetch = async (_url, init) => {
+  globalThis.fetch = async (url, init) => {
+    requestUrl = String(url);
     requestBody = JSON.parse(String(init?.body)) as unknown;
     requestHeaders = new Headers(init?.headers);
     return jsonResponse({
@@ -120,11 +128,44 @@ test("sends function tools to Anthropic Messages providers", async () => {
   assert.equal(result.provider, "anthropic");
   assert.equal(result.toolCalls?.[0]?.name, "lookup_order");
   assert.deepEqual(result.toolCalls?.[0]?.arguments, { order_id: "A123", include_refunds: true });
+  assert.equal(requestUrl, "https://api.anthropic.com/v1/messages");
   assert.equal(requestHeaders?.get("anthropic-version"), "2023-06-01");
   assert.deepEqual(getPath(requestBody, ["tools", 0, "name"]), "lookup_order");
   assert.deepEqual(getPath(requestBody, ["tools", 0, "input_schema", "required", 0]), "order_id");
   assert.deepEqual(getPath(requestBody, ["tool_choice", "type"]), "tool");
   assert.deepEqual(getPath(requestBody, ["tool_choice", "name"]), "lookup_order");
+});
+
+test("rejects baseUrl for official providers before provider calls", async () => {
+  await assert.rejects(
+    callProvider(
+      {
+        type: "openai",
+        apiKeyEnv: "AICI_TEST_API_KEY",
+        baseUrl: "https://proxy.example.test/v1",
+        model: "gpt-5.4-mini",
+      } as unknown as AiciProvider,
+      toolTest("openai-base-url"),
+      "Check order A123.",
+      process.cwd(),
+    ),
+    /Provider "openai" does not allow baseUrl/,
+  );
+
+  await assert.rejects(
+    callProvider(
+      {
+        type: "anthropic",
+        apiKeyEnv: "AICI_TEST_API_KEY",
+        baseUrl: "https://proxy.example.test/v1",
+        model: "claude-haiku-4-5",
+      } as unknown as AiciProvider,
+      toolTest("anthropic-base-url"),
+      "Check order A123.",
+      process.cwd(),
+    ),
+    /Provider "anthropic" does not allow baseUrl/,
+  );
 });
 
 function chatProvider(): AiciProvider {
@@ -150,7 +191,6 @@ function anthropicProvider(): AiciProvider {
   return {
     type: "anthropic",
     apiKeyEnv: "AICI_TEST_API_KEY",
-    baseUrl: "https://example.test/v1",
     model: "claude-haiku-4-5",
   };
 }

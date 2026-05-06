@@ -5,18 +5,30 @@ export type AiciConfig = {
   tests: AiciTest[];
 };
 
-export type AiciProvider = {
-  type: "openai" | "openai-compatible" | "anthropic";
+type AiciProviderBase = {
   model: string;
   api?: "responses" | "chat-completions" | "messages";
   apiKeyEnv?: string;
-  baseUrl?: string;
   apiVersion?: string;
   timeoutMs?: number;
   retries?: number;
   temperature?: number;
   maxOutputTokens?: number;
 };
+
+export type AiciProvider =
+  | (AiciProviderBase & {
+    type: "openai";
+    baseUrl?: never;
+  })
+  | (AiciProviderBase & {
+    type: "openai-compatible";
+    baseUrl: string;
+  })
+  | (AiciProviderBase & {
+    type: "anthropic";
+    baseUrl?: never;
+  });
 
 export type AiciTest = {
   name: string;

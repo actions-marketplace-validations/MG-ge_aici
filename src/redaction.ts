@@ -32,6 +32,12 @@ export function redactTestResult(result: TestResult, redactions: string[]): Test
   return {
     ...result,
     output: redactText(result.output, redactions),
+    toolCalls: result.toolCalls?.map((toolCall) => ({
+      ...toolCall,
+      name: redactText(toolCall.name, redactions),
+      arguments: redactValue(toolCall.arguments, redactions),
+      raw: redactValue(toolCall.raw, redactions),
+    })),
     checks: result.checks.map((check) => ({
       ...check,
       message: redactText(check.message, redactions),
@@ -72,4 +78,25 @@ function addRedactionValue(values: Set<string>, value: string | undefined, minLe
   if (value && value.length >= minLength) {
     values.add(value);
   }
+}
+
+function redactValue(value: unknown, redactions: string[]): unknown {
+  if (typeof value === "string") {
+    return redactText(value, redactions);
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) => redactValue(item, redactions));
+  }
+
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entry]) => [
+        key,
+        redactValue(entry, redactions),
+      ]),
+    );
+  }
+
+  return value;
 }

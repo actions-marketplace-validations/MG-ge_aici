@@ -30,6 +30,14 @@ inputs:
     description: Upload Markdown and JSON reports as a workflow artifact.
     required: false
     default: "true"
+  allow-provider-secrets:
+    description: Allow live provider checks with provider API-key environment variables during pull_request or pull_request_target events. Set true only for trusted configs, prompts, schemas, and tool definitions.
+    required: false
+    default: "false"
+  provider-secret-envs:
+    description: Space or comma separated provider secret environment variable names guarded during pull_request and pull_request_target events.
+    required: false
+    default: "OPENAI_API_KEY ANTHROPIC_API_KEY"
 
 runs:
   using: composite
@@ -43,6 +51,43 @@ runs:
       if: ${{ inputs.build == 'true' }}
       shell: bash
       run: npm run build
+
+    - name: Guard provider secrets on pull requests
+      shell: bash
+      env:
+        AICI_ALLOW_PROVIDER_SECRETS: ${{ inputs.allow-provider-secrets }}
+        AICI_PROVIDER_SECRET_ENVS: ${{ inputs.provider-secret-envs }}
+      run: |
+        set -eu
+
+        case "${GITHUB_EVENT_NAME:-}" in
+          pull_request|pull_request_target) ;;
+          *) exit 0 ;;
+        esac
+
+        if [ "$AICI_ALLOW_PROVIDER_SECRETS" = "true" ]; then
+          exit 0
+        fi
+
+        present=""
+        secret_names="$(printf '%s' "$AICI_PROVIDER_SECRET_ENVS" | tr ',' ' ')"
+        for env_name in $secret_names; do
+          case "$env_name" in
+            ''|*[!A-Za-z0-9_]*)
+              echo "::error::Invalid provider secret environment variable name: $env_name"
+              exit 1
+              ;;
+          esac
+
+          if [ -n "$(printenv "$env_name" 2>/dev/null || true)" ]; then
+            present="${present}${present:+, }${env_name}"
+          fi
+        done
+
+        if [ -n "$present" ]; then
+          echo "::error::Aici provider secret env vars are present during ${GITHUB_EVENT_NAME}. Do not run live provider checks against untrusted PR configs. Move live checks to a trusted workflow or set allow-provider-secrets: true after reviewing aici.yml, prompts, schemas, and tool definitions."
+          exit 1
+        fi
 
     - name: Run Aici
       shell: bash

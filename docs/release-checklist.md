@@ -12,6 +12,10 @@
 - [x] Verify one live Anthropic text-output test.
 - [x] Verify one live Anthropic tool-call test.
 - [x] Run the Codex Security scan checklist for CLI, GitHub Action, reports, and static frontend.
+- [x] Add dependency scanning, Dependency Review, CodeQL, and Dependabot workflows.
+- [x] Add Cloudflare Pages security headers.
+- [x] Add package metadata pointing to the security policy.
+- [x] Add favicon, OG/social image, and product-proof screenshots to the landing page.
 - Review `.aici/aici-report.json` for redaction behavior.
 - Confirm README, quickstart, config reference, and changelog are current.
 

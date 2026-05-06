@@ -81,7 +81,7 @@ tests:
       maxCostUsd: 0.02
 ```
 
-OpenAI defaults to the Responses API. OpenAI-compatible providers default to chat completions.
+OpenAI defaults to the Responses API and always uses the official OpenAI API endpoint. `type: openai` does not accept `baseUrl`; use `type: openai-compatible` for custom gateways, local servers, or third-party OpenAI-compatible endpoints.
 
 ---
 
@@ -111,7 +111,7 @@ tests:
       maxCostUsd: 0.02
 ```
 
-Anthropic providers use the Messages API. Use `claude-haiku-4-5` for low-cost smoke tests, and move to Sonnet/Opus only for checks where stronger reasoning is worth the cost.
+Anthropic providers use the Messages API and always use the official Anthropic API endpoint. `type: anthropic` does not accept `baseUrl`. Use `claude-haiku-4-5` for low-cost smoke tests, and move to Sonnet/Opus only for checks where stronger reasoning is worth the cost.
 
 ---
 
@@ -153,7 +153,7 @@ tests:
 | `model` | yes | Provider model id |
 | `api` | no | `responses`, `chat-completions`, or `messages` |
 | `apiKeyEnv` | no | Environment variable containing API key |
-| `baseUrl` | for compatible providers | Base URL ending before `/responses`, `/chat/completions`, or `/messages` |
+| `baseUrl` | only for `openai-compatible` | Required for compatible providers and rejected for `openai` and `anthropic`; base URL must end before `/responses`, `/chat/completions`, or `/messages` |
 | `apiVersion` | no | Provider API version header, currently used by Anthropic |
 | `timeoutMs` | no | Request timeout, default `30000` |
 | `retries` | no | Retry count after first failed attempt, default `1` |
@@ -213,7 +213,7 @@ redact:
   - customer@example.com
 ```
 
-Aici automatically redacts values from configured provider API-key environment variables and common bearer/API-key patterns in error messages and reports. Use `redact` for additional customer ids, emails, tenant names, or fixture secrets that must not appear in CI artifacts.
+Aici automatically redacts values from configured provider API-key environment variables and common bearer/API-key patterns in error messages and reports. Redaction is applied recursively to model output, check messages, and normalized tool-call details. Use `redact` for additional customer ids, emails, tenant names, or fixture secrets that must not appear in CI artifacts.
 
 ---
 

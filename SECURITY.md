@@ -32,6 +32,7 @@ Aici v0.1 is local/CI-first:
 - Provider API keys are read from environment variables.
 - Reports are written to the local filesystem or CI artifacts.
 - Config-referenced files are constrained to the config directory.
+- The GitHub Action blocks guarded provider secret env vars during pull-request events unless live checks are explicitly allowed for a trusted config.
 
 See [docs/security.md](./docs/security.md) and [docs/data-handling.md](./docs/data-handling.md) for operational guidance.
 

@@ -11,6 +11,9 @@
   "bugs": {
     "url": "https://github.com/MG-ge/aici/issues"
   },
+  "security": {
+    "url": "https://github.com/MG-ge/aici/security/policy"
+  },
   "publishConfig": {
     "access": "public"
   },

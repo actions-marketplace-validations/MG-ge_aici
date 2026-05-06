@@ -83,6 +83,9 @@ const MODEL_PRICING_USD_PER_1M_TOKENS: Record<string, { input: number; output: n
   "claude-opus-4-7": { input: 5, output: 25 },
 };
 
+const OPENAI_BASE_URL = "https://api.openai.com/v1";
+const ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1";
+
 export async function callProvider(
   provider: AiciProvider,
   test: AiciTest,
@@ -106,6 +109,10 @@ async function callAnthropicMessages(
   prompt: string,
   rootDir: string,
 ): Promise<ProviderCall> {
+  if (provider.baseUrl !== undefined) {
+    throw new Error(`Provider "anthropic" does not allow baseUrl; use type "openai-compatible" for custom endpoints.`);
+  }
+
   const apiKeyEnv = provider.apiKeyEnv ?? "ANTHROPIC_API_KEY";
   const apiKey = process.env[apiKeyEnv];
 
@@ -113,7 +120,7 @@ async function callAnthropicMessages(
     throw new Error(`Missing API key env var ${apiKeyEnv} for test "${test.name}".`);
   }
 
-  const baseUrl = stripTrailingSlash(provider.baseUrl ?? "https://api.anthropic.com/v1");
+  const baseUrl = ANTHROPIC_BASE_URL;
   const startedAt = performance.now();
   const tools = await resolveTools(test, rootDir);
   const response = await fetchWithTimeout(`${baseUrl}/messages`, {
@@ -167,19 +174,27 @@ async function callOpenAiCompatible(
   prompt: string,
   rootDir: string,
 ): Promise<ProviderCall> {
+  if (provider.type === "anthropic") {
+    throw new Error(`Unsupported provider type: ${provider.type}`);
+  }
+
+  if (provider.type === "openai" && provider.baseUrl !== undefined) {
+    throw new Error(`Provider "openai" does not allow baseUrl; use type "openai-compatible" for custom endpoints.`);
+  }
+
+  const baseUrl = provider.type === "openai"
+    ? OPENAI_BASE_URL
+    : stripTrailingSlash(provider.baseUrl);
+
+  if (!baseUrl) {
+    throw new Error(`Provider "${provider.type}" requires baseUrl.`);
+  }
+
   const apiKeyEnv = provider.apiKeyEnv ?? "OPENAI_API_KEY";
   const apiKey = process.env[apiKeyEnv];
 
   if (!apiKey) {
     throw new Error(`Missing API key env var ${apiKeyEnv} for test "${test.name}".`);
-  }
-
-  const baseUrl = stripTrailingSlash(
-    provider.baseUrl ?? (provider.type === "openai" ? "https://api.openai.com/v1" : ""),
-  );
-
-  if (!baseUrl) {
-    throw new Error(`Provider "${provider.type}" requires baseUrl.`);
   }
 
   const api = provider.api ?? (provider.type === "openai" ? "responses" : "chat-completions");

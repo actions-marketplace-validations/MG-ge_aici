@@ -34,6 +34,51 @@ export const AICI_CONFIG_SCHEMA = {
       "type": "object",
       "required": ["type", "model"],
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "openai-compatible"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "required": ["baseUrl"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "openai"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "not": {
+              "required": ["baseUrl"]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "anthropic"
+              }
+            },
+            "required": ["type"]
+          },
+          "then": {
+            "not": {
+              "required": ["baseUrl"]
+            }
+          }
+        }
+      ],
       "properties": {
         "type": {
           "enum": ["openai", "openai-compatible", "anthropic"]

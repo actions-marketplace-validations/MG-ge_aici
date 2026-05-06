@@ -132,6 +132,8 @@ Live provider scripts expect `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the envi
 
 The default sample stays provider-free so CI and local checks remain deterministic.
 
+Do not run live provider checks with provider secrets against untrusted pull request configs, prompts, schemas, or tool definitions. The GitHub Action blocks guarded provider secret env vars on pull-request events unless `allow-provider-secrets: true` is set.
+
 Config schema:
 
 ```bash

@@ -134,6 +134,10 @@ function validateProvider(value: unknown, label: string): AiciProvider {
     throw new Error(`${label}.baseUrl is required for openai-compatible providers.`);
   }
 
+  if ((value.type === "openai" || value.type === "anthropic") && value.baseUrl !== undefined) {
+    throw new Error(`${label}.baseUrl is only allowed for openai-compatible providers.`);
+  }
+
   if (value.type === "anthropic" && value.api !== undefined && value.api !== "messages") {
     throw new Error(`${label}.api must be "messages" for anthropic providers.`);
   }

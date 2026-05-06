@@ -4,7 +4,16 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Aici is a small CLI and GitHub Action that fails pull requests when LLM prompts, JSON output, tool calls, latency, or cost regress.">
-  <link rel="icon" href="data:,">
+  <meta name="theme-color" content="#202632">
+  <meta property="og:title" content="Aici - fail the PR when the LLM regresses">
+  <meta property="og:description" content="A small CLI and GitHub Action for prompts, JSON contracts, tool calls, latency, and cost before deploy.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="/assets/og-card.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Aici - fail the PR when the LLM regresses">
+  <meta name="twitter:description" content="CLI + GitHub Action for LLM regression checks before deploy.">
+  <meta name="twitter:image" content="/assets/og-card.png">
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -38,6 +47,7 @@
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
+      overflow-x: hidden;
       background: var(--paper);
       color: var(--ink);
       font: 17px/1.55 var(--sans);
@@ -476,6 +486,42 @@
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 24px;
     }
+    .proof-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .proof-shot {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+    .proof-shot img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: contain;
+      background: var(--paper-2);
+    }
+    .proof-body {
+      border-top: 1px solid var(--line);
+      padding: 18px;
+    }
+    .proof-body h3 {
+      margin: 0 0 8px;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .proof-body p {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 14px;
+      line-height: 1.5;
+    }
     .fit-col {
       border: 1px solid var(--line);
       border-radius: 14px;
@@ -683,6 +729,7 @@
     @media (max-width: 880px) {
       .diff,
       .fit,
+      .proof-grid,
       .price-grid { grid-template-columns: 1fr; }
       .pane + .pane {
         border-left: 0;
@@ -695,13 +742,23 @@
       .trust-cell:nth-child(2n+1) { border-left: 0; }
     }
     @media (max-width: 720px) {
-      .wrap { width: min(100% - 40px, 1120px); }
+      .wrap { width: min(1120px, calc(100% - 40px)); }
       .hero { padding-top: 54px; }
       section { padding: 72px 0; }
       .hide-sm { display: none; }
+      .nav a:not(.primary-link) { display: none; }
       .nav { gap: 2px; }
       .nav a { padding-inline: 8px; }
-      h1 { font-size: clamp(40px, 13vw, 64px); }
+      h1 {
+        max-width: 100%;
+        font-size: 48px;
+        line-height: 1.04;
+      }
+      h1 em { display: block; }
+      .lede {
+        max-width: 32ch;
+        font-size: 17px;
+      }
       .pr-head,
       .pr-foot,
       .check-row {
@@ -754,6 +811,7 @@
       </a>
       <nav class="nav" aria-label="Primary">
         <a href="#how" class="hide-sm">how it works</a>
+        <a href="#proof" class="hide-sm">proof</a>
         <a href="#fit" class="hide-sm">is it for you?</a>
         <a href="#trust" class="hide-sm">safety</a>
         <a href="#packaging">pricing</a>
@@ -860,6 +918,38 @@
             </div>
             <pre class="run" id="run" aria-live="polite" aria-label="Aici run output"></pre>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="proof">
+      <div class="wrap">
+        <div class="eyebrow">product proof</div>
+        <h2>The failure state is the product.</h2>
+        <p class="section-lede">The launch page now carries concrete product states: local CLI failure, pull-request failure, and the HTML report artifact a developer gets after a run.</p>
+
+        <div class="proof-grid">
+          <article class="proof-shot">
+            <img src="/assets/cli-failing-local.png" width="960" height="600" alt="Aici CLI failing locally with a JSON Schema error">
+            <div class="proof-body">
+              <h3>CLI fails locally</h3>
+              <p>A real failing fixture run exits non-zero and shows the exact check that broke.</p>
+            </div>
+          </article>
+          <article class="proof-shot">
+            <img src="/assets/github-action-failing-pr.png" width="960" height="600" alt="GitHub pull request checks showing Aici failing and blocking merge">
+            <div class="proof-body">
+              <h3>PR gets blocked</h3>
+              <p>The GitHub Action turns prompt regressions into normal pull-request evidence.</p>
+            </div>
+          </article>
+          <article class="proof-shot">
+            <img src="/assets/report-artifact.png" width="960" height="600" alt="Aici HTML report artifact with a failed JSON Schema check">
+            <div class="proof-body">
+              <h3>Report artifact</h3>
+              <p>The same run writes Markdown, JSON, and HTML reports for review and CI artifacts.</p>
+            </div>
+          </article>
         </div>
       </div>
     </section>
