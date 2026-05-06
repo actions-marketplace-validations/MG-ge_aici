@@ -9,10 +9,10 @@ npm install
 npm run build
 ```
 
-For published usage later:
+For published usage:
 
 ```bash
-npx aici init --config aici.yml
+npx @mgicloud/aici init --config aici.yml
 ```
 
 ## 2. Create A Test

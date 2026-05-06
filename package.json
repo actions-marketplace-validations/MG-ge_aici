@@ -1,5 +1,5 @@
 {
-  "name": "aici",
+  "name": "@mgicloud/aici",
   "version": "0.1.0",
   "description": "Aici catches LLM regressions before deploy with AI-native CI checks.",
   "type": "module",
@@ -10,6 +10,9 @@
   },
   "bugs": {
     "url": "https://github.com/MG-ge/aici/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "keywords": [
     "llm",
@@ -32,7 +35,7 @@
     "action.yml"
   ],
   "bin": {
-    "aici": "./dist/cli.js"
+    "aici": "dist/cli.js"
   },
   "scripts": {
     "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",

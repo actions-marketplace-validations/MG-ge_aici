@@ -81,7 +81,8 @@ The product promise is:
 
 Brand model:
 
-- **Aici** is the product, CLI, and package name.
+- **Aici** is the product and CLI command.
+- `@mgicloud/aici` is the npm package.
 - "AI quality gate" is the category descriptor.
 - `aici.yml` is the stable config interface.
 

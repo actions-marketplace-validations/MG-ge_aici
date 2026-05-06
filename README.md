@@ -29,7 +29,8 @@ This is one product, not five separate tools. Structured output tests, cost guar
 Name model:
 
 - **Aici** is the brand and CLI.
-- `aici` is the npm package and command.
+- `@mgicloud/aici` is the npm package.
+- `aici` is the command.
 - `aici.yml` is the stable config file.
 - "AI quality gate" is the category descriptor, not the primary brand.
 
