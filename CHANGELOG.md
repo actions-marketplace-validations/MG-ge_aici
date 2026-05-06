@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.1 - 2026-05-06
+
+- Hardened provider config so official OpenAI and Anthropic providers always use official endpoints and reject `baseUrl`.
+- Kept custom `baseUrl` support scoped to `openai-compatible` providers.
+- Added config and provider tests for allowed and rejected endpoint cases.
+- Expanded redaction to recursively cover tool-call arguments and raw provider payloads in reports.
+- Added a GitHub Action guard for provider secrets on untrusted pull-request configs.
+- Added npm audit, Dependency Review, CodeQL, Dependabot, Cloudflare Pages headers, and package security metadata.
+- Added landing-page favicon, social preview image, and product-proof screenshots.
+
 ## 0.1.0 - 2026-05-06
 
 - Added TypeScript CLI with `init`, `validate`, `schema`, and `run`.

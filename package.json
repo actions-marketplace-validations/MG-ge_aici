@@ -1,6 +1,6 @@
 {
   "name": "@mgicloud/aici",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Aici catches LLM regressions before deploy with AI-native CI checks.",
   "type": "module",
   "homepage": "https://github.com/MG-ge/aici#readme",
