@@ -30,6 +30,7 @@
     "examples",
     "docs",
     "README.md",
+    "SECURITY.md",
     "LICENSE",
     "CHANGELOG.md",
     "action.yml"

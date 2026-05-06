@@ -6,6 +6,8 @@
 
 Aici is designed as a local/CI-first tool. It does not require hosted storage, hosted prompt logs, or a backend service in v1.
 
+For a concise data-flow explanation, see [Data Handling](./data-handling.md).
+
 ## Secrets
 
 - API keys are read from environment variables named by `provider.apiKeyEnv`.
@@ -34,6 +36,30 @@ Recommended defaults:
 - Keep provider keys in GitHub Actions secrets.
 - Disable PR comments for private or sensitive outputs.
 - Review `.aici/aici-report.json` before enabling artifact upload on real customer data.
+
+## Threats Aici Tries To Reduce
+
+- Silent prompt regressions that bypass normal unit tests.
+- Broken JSON contracts reaching downstream code.
+- Unexpected tool/function calls caused by prompt or model changes.
+- Accidental config references to files outside the project.
+- Secret leakage through common API-key and bearer-token patterns in reports.
+
+## Threats You Still Own
+
+- Prompt or output data sent to model providers in live checks.
+- CI artifact visibility and retention.
+- GitHub Actions secret permissions.
+- Sensitive test fixtures committed to the repository.
+- Provider-side logging, abuse monitoring, or retention behavior.
+
+## Recommended Workflow For Sensitive Repositories
+
+1. Use fixture tests for most coverage.
+2. Run live checks only on sanitized prompts or non-production inputs.
+3. Keep `upload-artifact: false` until reports are reviewed.
+4. Keep `pr-comment: false` for private outputs.
+5. Add `redact` entries for tenant ids, customer ids, and emails.
 
 ## Non-Goals In V1
 

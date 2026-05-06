@@ -1,0 +1,42 @@
+name: Product feedback
+description: Tell us where Aici does or does not fit your LLM workflow.
+title: "[Feedback]: "
+labels: ["feedback"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for workflow fit, missing checks, docs gaps, examples, provider support, and product direction.
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What are you trying to test?
+      description: Describe the LLM workflow, prompt, structured output, or tool call you want to gate in CI.
+      placeholder: "Example: support bot returns JSON for refund decisions, but model changes sometimes break the schema."
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: What did you try?
+      description: Link or paste the smallest sanitized aici.yml/example you can share.
+    validations:
+      required: false
+  - type: textarea
+    id: missing
+    attributes:
+      label: What is missing or confusing?
+      description: Tell us what blocked adoption.
+    validations:
+      required: true
+  - type: dropdown
+    id: fit
+    attributes:
+      label: Fit
+      options:
+        - I would use this if one thing changed
+        - I understand it but do not need it
+        - I do not understand the product yet
+        - I need a different product shape
+    validations:
+      required: true

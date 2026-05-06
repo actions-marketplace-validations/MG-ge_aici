@@ -68,7 +68,7 @@
     .links {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       color: var(--muted);
       font-weight: 800;
       font-size: 14px;
@@ -266,6 +266,46 @@
       font-weight: 950;
     }
     .badge.bad { background: var(--red); }
+    .contrast {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .contrast article {
+      min-height: 210px;
+      padding: 26px;
+      border-radius: 28px;
+      border: 1px solid var(--line);
+    }
+    .contrast article:first-child {
+      color: #fff5ee;
+      background: linear-gradient(135deg, #2d3340, #141922);
+      box-shadow: 0 22px 70px rgba(16, 21, 31, 0.16);
+    }
+    .contrast article:last-child {
+      background: linear-gradient(135deg, rgba(16, 114, 79, 0.15), rgba(255, 250, 240, 0.82));
+      box-shadow: 0 22px 70px rgba(50, 39, 26, 0.1);
+    }
+    .contrast span {
+      display: inline-flex;
+      margin-bottom: 18px;
+      border-radius: 999px;
+      padding: 5px 10px;
+      color: inherit;
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 12px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .contrast h3 {
+      margin: 0 0 10px;
+      font-size: clamp(26px, 3vw, 42px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+    }
+    .contrast p { margin: 0; color: var(--muted); font-size: 18px; }
+    .contrast article:first-child p { color: #bdc7d6; }
     .quote {
       padding: 24px;
       background: rgba(24, 79, 99, 0.09);
@@ -288,7 +328,7 @@
     @media (max-width: 920px) {
       main { padding-top: 30px; }
       .nav { margin-bottom: 38px; }
-      .hero, .grid, .example { grid-template-columns: 1fr; }
+      .hero, .grid, .example, .contrast { grid-template-columns: 1fr; }
       .trust { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .section-head { display: block; }
       .section-head p { margin-top: 12px; }
@@ -311,6 +351,7 @@
       <a class="brand" href="#top" aria-label="Aici home"><span class="mark" aria-hidden="true"></span><span class="brand-name">Aici</span></a>
       <div class="links" aria-label="Resources">
         <a href="https://github.com/MG-ge/aici">GitHub</a>
+        <a href="https://github.com/MG-ge/aici/tree/main/docs">Docs</a>
         <a href="https://www.npmjs.com/package/@mgicloud/aici">npm</a>
         <a href="https://github.com/MG-ge/aici/releases/tag/v0.1.0">v0.1.0</a>
       </div>
@@ -327,6 +368,7 @@
         </div>
         <div class="actions">
           <a class="button" href="https://github.com/MG-ge/aici#readme">Start in GitHub</a>
+          <a class="button secondary" href="https://github.com/MG-ge/aici/blob/main/docs/quickstart.md">Read docs</a>
           <a class="button secondary" href="https://www.npmjs.com/package/@mgicloud/aici">View npm package</a>
         </div>
       </div>
@@ -355,6 +397,25 @@ Reports written to .aici/</code></pre>
       <span>JSON Schema</span>
       <span>No prompt storage</span>
     </div>
+
+    <section aria-labelledby="desire">
+      <div class="section-head">
+        <h2 id="desire">Stop finding AI regressions after users do.</h2>
+        <p>Aici gives AI changes the same release discipline as code changes: small tests, clear failures, and evidence attached to the pull request.</p>
+      </div>
+      <div class="contrast">
+        <article>
+          <span>Before</span>
+          <h3>A prompt change looks harmless until production behavior drifts.</h3>
+          <p>Schema fields disappear, required tools are skipped, latency jumps, or cost changes without a normal test failing.</p>
+        </article>
+        <article>
+          <span>After</span>
+          <h3>The pull request fails with the exact contract that changed.</h3>
+          <p>Developers see the broken JSON, missing tool call, latency guard, or cost guard before the change is merged.</p>
+        </article>
+      </div>
+    </section>
 
     <section aria-labelledby="why">
       <div class="section-head">
@@ -449,7 +510,7 @@ tests:
 
     <footer>
       <span>Aici is open-source AI CI for teams shipping LLM features.</span>
-      <span><a href="https://github.com/MG-ge/aici">GitHub</a> · <a href="https://www.npmjs.com/package/@mgicloud/aici">npm</a></span>
+      <span><a href="https://github.com/MG-ge/aici">GitHub</a> · <a href="https://github.com/MG-ge/aici/issues/new?template=feedback.yml">Feedback</a> · <a href="https://www.npmjs.com/package/@mgicloud/aici">npm</a></span>
     </footer>
   </main>
 

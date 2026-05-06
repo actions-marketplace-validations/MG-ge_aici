@@ -19,6 +19,26 @@ Use `aici.yml` to test prompt behavior, JSON contracts, tool calls, cost, and la
 
 ---
 
+## Who It Is For
+
+Aici is for developers who already ship LLM features and need a small release gate before deploy.
+
+Good fits:
+
+- JSON or structured-output workflows that break downstream code when shape changes.
+- Tool/function-calling agents where the model must call the right tool with valid arguments.
+- Support, extraction, classification, and API-wrapper prompts that need regression tests.
+- Teams that want GitHub Actions evidence without adopting a full tracing or governance platform.
+
+Not a good fit yet:
+
+- Hosted prompt observability.
+- Human annotation workflows.
+- Managed eval datasets.
+- Hosted generation or proxying production traffic.
+
+---
+
 ## Strategic Frame
 
 Aici is a no-calls, self-serve developer tool. It should be bought and adopted like a CI utility, not sold like an enterprise governance platform.
@@ -166,6 +186,15 @@ jobs:
 |---|---|
 | [Config Reference](./docs/config-reference.md) | `aici.yml` fields, providers, and checks |
 | [Quickstart](./docs/quickstart.md) | Five-minute local and GitHub Action setup |
+| [Examples Guide](./docs/examples.md) | Which example or template to start from |
 | [GitHub Action](./docs/github-action.md) | Action inputs, PR comments, and workflow setup |
+| [Data Handling](./docs/data-handling.md) | What leaves your machine and what is stored |
 | [Security](./docs/security.md) | Redaction, secrets, and CI artifact guidance |
 | [Release Checklist](./docs/release-checklist.md) | Checks before publishing v1 |
+
+## Feedback
+
+If Aici does not fit your LLM workflow yet, open a GitHub issue with the smallest failing example you can share:
+
+- [Product feedback](https://github.com/MG-ge/aici/issues/new?template=feedback.yml)
+- [Bug report](https://github.com/MG-ge/aici/issues/new?template=bug_report.yml)
