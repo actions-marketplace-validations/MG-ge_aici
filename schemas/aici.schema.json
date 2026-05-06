@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-quality-gate.dev/schemas/aici.schema.json",
-  "title": "AI Quality Gate config",
+  "$id": "urn:aici:schema:config:v1",
+  "title": "Aici config",
   "type": "object",
   "required": [
     "version",

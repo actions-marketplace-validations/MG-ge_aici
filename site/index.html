@@ -4,99 +4,221 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>AI Quality Gate</title>
+  <title>Aici - Catch LLM regressions before deploy</title>
   <style>
     :root {
-      --ink: #111827;
-      --muted: #5b6472;
-      --paper: #f6efe4;
+      color-scheme: light;
+      --ink: #11151d;
+      --muted: #657184;
+      --paper: #f4eee3;
       --panel: #fffaf0;
-      --line: #ded5c5;
-      --accent: #1f4e79;
-      --accent-2: #a35529;
+      --line: #ded4c4;
+      --accent: #194c5f;
+      --accent-2: #b65c32;
+      --green: #126a4a;
+      --shadow: rgba(50, 39, 26, 0.16);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       color: var(--ink);
       background:
-        radial-gradient(circle at 12% 18%, rgba(31, 78, 121, 0.18), transparent 28rem),
-        radial-gradient(circle at 88% 4%, rgba(163, 85, 41, 0.18), transparent 24rem),
-        linear-gradient(135deg, #f7f1e8 0%, #ece0cf 100%);
+        radial-gradient(circle at 8% 12%, rgba(25, 76, 95, 0.22), transparent 29rem),
+        radial-gradient(circle at 86% 2%, rgba(182, 92, 50, 0.18), transparent 25rem),
+        linear-gradient(135deg, #f7f1e7 0%, #eadfce 100%);
       font: 16px/1.55 ui-sans-serif, "Avenir Next", "Segoe UI", sans-serif;
     }
-    main { max-width: 1160px; margin: 0 auto; padding: 72px 24px; }
-    .hero { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr); gap: 28px; align-items: center; }
-    h1 { margin: 0; font-size: clamp(48px, 8vw, 96px); letter-spacing: -0.075em; line-height: 0.9; }
-    .eyebrow { color: var(--accent-2); font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-    .lede { max-width: 720px; color: var(--muted); font-size: clamp(19px, 2vw, 24px); }
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 30px;
-      box-shadow: 0 24px 90px rgba(54, 43, 29, 0.13);
-      padding: 28px;
+    main { max-width: 1180px; margin: 0 auto; padding: 72px 24px 44px; }
+    .nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 64px;
     }
-    pre { overflow-x: auto; margin: 0; color: #e8f0ff; background: #10151f; border-radius: 20px; padding: 22px; }
-    code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 14px; }
-    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      font-size: 24px;
+    }
+    .mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 12px 30px rgba(25, 76, 95, 0.24);
+    }
+    .nav span:last-child {
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.16fr) minmax(330px, 0.84fr);
+      gap: 32px;
+      align-items: center;
+    }
+    .eyebrow {
+      color: var(--accent-2);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin: 0 0 14px;
+    }
+    h1 {
+      max-width: 780px;
+      margin: 0;
+      font-size: clamp(54px, 8vw, 104px);
+      letter-spacing: -0.08em;
+      line-height: 0.88;
+    }
+    .lede {
+      max-width: 710px;
+      margin: 24px 0 0;
+      color: var(--muted);
+      font-size: clamp(19px, 2vw, 24px);
+    }
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
     .button {
       display: inline-flex;
       align-items: center;
+      min-height: 46px;
       border-radius: 999px;
       padding: 12px 18px;
       color: white;
       background: var(--accent);
       text-decoration: none;
-      font-weight: 800;
+      font-weight: 900;
+      box-shadow: 0 14px 32px rgba(25, 76, 95, 0.22);
     }
-    .button.secondary { color: var(--ink); background: transparent; border: 1px solid var(--line); }
-    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
-    .card { background: rgba(255, 250, 240, 0.72); border: 1px solid var(--line); border-radius: 24px; padding: 22px; }
-    .card h2 { margin: 0 0 8px; font-size: 20px; }
+    .button.secondary {
+      color: var(--ink);
+      background: rgba(255, 250, 240, 0.56);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+    .panel {
+      position: relative;
+      background: rgba(255, 250, 240, 0.86);
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      box-shadow: 0 28px 90px var(--shadow);
+      padding: 18px;
+      overflow: hidden;
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(25, 76, 95, 0.08), transparent 42%);
+      pointer-events: none;
+    }
+    .terminal {
+      position: relative;
+      color: #e9f3f1;
+      background: #10151f;
+      border-radius: 22px;
+      overflow: hidden;
+    }
+    .terminal-bar {
+      display: flex;
+      gap: 7px;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 999px; background: #6e7b8f; }
+    .dot:nth-child(1) { background: #df6a4e; }
+    .dot:nth-child(2) { background: #d9b856; }
+    .dot:nth-child(3) { background: #5fbf83; }
+    pre { overflow-x: auto; margin: 0; padding: 22px; }
+    code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 14px; }
+    .pass { color: #8be7b6; }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 38px;
+    }
+    .card {
+      background: rgba(255, 250, 240, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+    }
+    .card strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
     .card p { margin: 0; color: var(--muted); }
+    footer {
+      margin-top: 34px;
+      color: var(--muted);
+      font-size: 14px;
+    }
     @media (max-width: 860px) {
+      main { padding-top: 34px; }
+      .nav { margin-bottom: 38px; }
       .hero, .grid { grid-template-columns: 1fr; }
-      main { padding-top: 44px; }
+      .nav span:last-child { display: none; }
+      h1 { font-size: clamp(48px, 16vw, 78px); }
     }
   </style>
 </head>
 <body>
   <main>
+    <nav class="nav" aria-label="Product">
+      <span class="brand"><span class="mark" aria-hidden="true"></span>Aici</span>
+      <span>AI CI for LLM apps</span>
+    </nav>
     <section class="hero">
       <div>
-        <p class="eyebrow">CI for LLM apps</p>
-        <h1>Catch AI regressions before deploy.</h1>
-        <p class="lede">Test prompts, structured outputs, tool calls, cost, and latency in pull requests. Local-first, provider-light, and built for solo teams that need reliable AI releases.</p>
+        <p class="eyebrow">AI quality gates for CI</p>
+        <h1>Catch LLM regressions before deploy.</h1>
+        <p class="lede">Aici tests prompts, structured outputs, tool calls, cost, and latency in pull requests. Local-first, provider-light, and built for teams that need reliable AI releases without a platform migration.</p>
         <div class="actions">
           <a class="button" href="../docs/quickstart.md">Read Quickstart</a>
           <a class="button secondary" href="../README.md">View README</a>
         </div>
       </div>
-      <div class="panel">
-        <pre><code>version: 1
-tests:
-  - name: refund-policy-json
-    mockOutputFile: output.json
-    expect:
-      jsonSchema: schema.json
-      maxLatencyMs: 1000</code></pre>
+      <div class="panel" aria-label="Aici terminal example">
+        <div class="terminal">
+          <div class="terminal-bar" aria-hidden="true">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          <pre><code>$ aici run
+<span class="pass">PASS</span> 2 tests
+
+refund-policy-json
+  - jsonSchema: valid
+  - cost: $0.001 <= $0.02
+
+Reports written to .aici/</code></pre>
+        </div>
       </div>
     </section>
-    <section class="grid">
+    <section class="grid" aria-label="Product capabilities">
       <article class="card">
-        <h2>Structured Output</h2>
+        <strong>Structured Output</strong>
         <p>Fail builds when JSON output breaks API contracts or schema guarantees.</p>
       </article>
       <article class="card">
-        <h2>Tool Calls</h2>
-        <p>Normalize and validate function calls across Responses and chat-completions providers.</p>
+        <strong>Tool Calls</strong>
+        <p>Normalize and validate function calls across OpenAI-compatible and Anthropic providers.</p>
       </article>
       <article class="card">
-        <h2>Release Evidence</h2>
-        <p>Generate Markdown, JSON, and HTML artifacts for PRs and audit trails.</p>
+        <strong>Release Evidence</strong>
+        <p>Generate Markdown, JSON, and HTML artifacts for pull requests and audit trails.</p>
       </article>
     </section>
+    <footer>Aici is open-source AI CI for teams shipping LLM features.</footer>
   </main>
 </body>
 </html>

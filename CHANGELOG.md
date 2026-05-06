@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 - 2026-05-05
+## 0.1.0 - 2026-05-06
 
 - Added TypeScript CLI with `init`, `validate`, `schema`, and `run`.
 - Added deterministic fixture tests for text output and normalized tool calls.

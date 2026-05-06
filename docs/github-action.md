@@ -1,6 +1,6 @@
 # GitHub Action
 
-**Last updated:** 2026-05-05
+**Last updated:** 2026-05-06
 
 ## Inputs
 
@@ -17,7 +17,7 @@
 ## Minimal Workflow
 
 ```yaml
-name: AI Quality Gate
+name: Aici
 
 on:
   pull_request:

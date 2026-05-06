@@ -1,7 +1,7 @@
 {
   "name": "aici",
   "version": "0.1.0",
-  "description": "CI for LLM apps: test prompts, structured outputs, tool calls, cost, and latency before deploy.",
+  "description": "Aici catches LLM regressions before deploy with AI-native CI checks.",
   "type": "module",
   "keywords": [
     "llm",

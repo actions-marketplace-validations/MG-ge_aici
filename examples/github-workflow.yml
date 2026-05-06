@@ -1,4 +1,4 @@
-name: AI Quality Gate
+name: Aici
 
 on:
   pull_request:

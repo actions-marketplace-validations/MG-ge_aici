@@ -1,6 +1,6 @@
 # Product Requirements Document
 
-**Last updated:** 2026-05-05  
+**Last updated:** 2026-05-06
 **Status:** Draft v1  
 **Scope:** MVP through v1.0
 
@@ -8,9 +8,11 @@
 
 ## Product Definition
 
-AI Quality Gate is a developer-first CLI and GitHub Action for testing LLM workflows before deploy.
+Aici is a developer-first CLI and GitHub Action for testing LLM workflows before deploy.
 
 It runs test cases against prompts, model calls, structured outputs, tool calls, cost budgets, and latency budgets, then returns a pass/fail result suitable for CI.
+
+The product name is **Aici**. "AI quality gate" describes the category and job-to-be-done.
 
 ---
 

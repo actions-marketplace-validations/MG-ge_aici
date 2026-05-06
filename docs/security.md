@@ -1,10 +1,10 @@
 # Security
 
-**Last updated:** 2026-05-05
+**Last updated:** 2026-05-06
 
 ## V1 Security Model
 
-AI Quality Gate is designed as a local/CI-first tool. It does not require hosted storage, hosted prompt logs, or a backend service in v1.
+Aici is designed as a local/CI-first tool. It does not require hosted storage, hosted prompt logs, or a backend service in v1.
 
 ## Secrets
 

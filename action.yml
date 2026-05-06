@@ -1,4 +1,4 @@
-name: AI Quality Gate
+name: Aici
 description: Run LLM regression tests and fail pull requests when AI behavior regresses.
 
 inputs:
@@ -44,7 +44,7 @@ runs:
       shell: bash
       run: npm run build
 
-    - name: Run AI Quality Gate
+    - name: Run Aici
       shell: bash
       env:
         AICI_CONFIG: ${{ inputs.config }}
@@ -59,7 +59,7 @@ runs:
 
         if [ "$AICI_COMMENT" = "true" ] && [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
           {
-            echo "## AI Quality Gate"
+            echo "## Aici"
             echo
             if [ -f "$AICI_REPORT_DIR/aici-report.md" ]; then
               cat -- "$AICI_REPORT_DIR/aici-report.md"
@@ -71,7 +71,7 @@ runs:
 
         exit 0
 
-    - name: Upload AI Quality Gate reports
+    - name: Upload Aici reports
       if: ${{ always() && inputs.upload-artifact == 'true' }}
       uses: actions/upload-artifact@v4
       with:

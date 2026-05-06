@@ -1,6 +1,6 @@
 # Quickstart
 
-**Last updated:** 2026-05-05
+**Last updated:** 2026-05-06
 
 ## 1. Install
 
@@ -53,7 +53,7 @@ Use live checks for high-value prompts only. Keep most regression coverage fixtu
 ## 5. Add GitHub Actions
 
 ```yaml
-name: AI Quality Gate
+name: Aici
 
 on:
   pull_request:

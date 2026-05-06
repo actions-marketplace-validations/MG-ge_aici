@@ -1,16 +1,16 @@
-# AI Quality Gate
+# Aici
 
-> CI for LLM apps: test prompts, structured outputs, tool calls, cost, and latency before deploy.
+> Catch LLM regressions before deploy.
 
 **Status:** V1 release candidate  
-**Last updated:** 2026-05-05  
+**Last updated:** 2026-05-06
 **Owner:** MG
 
 ---
 
 ## Strategic Frame
 
-AI Quality Gate is a no-calls, self-serve developer tool. It should be bought and adopted like a CI utility, not sold like an enterprise governance platform.
+Aici is a no-calls, self-serve developer tool. It should be bought and adopted like a CI utility, not sold like an enterprise governance platform.
 
 The product promise:
 
@@ -25,6 +25,13 @@ The first product surface is:
 - optional hosted history later
 
 This is one product, not five separate tools. Structured output tests, cost guards, eval templates, and synthetic edge cases are features inside the same release-gate workflow.
+
+Name model:
+
+- **Aici** is the brand and CLI.
+- `aici` is the npm package and command.
+- `aici.yml` is the stable config file.
+- "AI quality gate" is the category descriptor, not the primary brand.
 
 ---
 
@@ -104,7 +111,7 @@ Use `schemas/aici.schema.json` for editor validation.
 GitHub Actions:
 
 ```yaml
-name: AI Quality Gate
+name: Aici
 
 on:
   pull_request:

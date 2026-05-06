@@ -1,6 +1,6 @@
 # Product Strategy
 
-**Last updated:** 2026-05-05
+**Last updated:** 2026-05-06
 
 ---
 
@@ -64,7 +64,7 @@ They do not want:
 One product:
 
 ```text
-AI Quality Gate
+Aici
 ├── regression checks
 ├── structured output checks
 ├── cost budgets
@@ -78,6 +78,12 @@ The product promise is not "observe every AI call."
 The product promise is:
 
 > Fail the PR when an LLM workflow regresses.
+
+Brand model:
+
+- **Aici** is the product, CLI, and package name.
+- "AI quality gate" is the category descriptor.
+- `aici.yml` is the stable config interface.
 
 ---
 

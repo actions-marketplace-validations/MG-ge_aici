@@ -1,6 +1,6 @@
 # Config Reference
 
-**Last updated:** 2026-05-05
+**Last updated:** 2026-05-06
 
 ---
 
@@ -213,7 +213,7 @@ redact:
   - customer@example.com
 ```
 
-AI Quality Gate automatically redacts values from configured provider API-key environment variables and common bearer/API-key patterns in error messages and reports. Use `redact` for additional customer ids, emails, tenant names, or fixture secrets that must not appear in CI artifacts.
+Aici automatically redacts values from configured provider API-key environment variables and common bearer/API-key patterns in error messages and reports. Use `redact` for additional customer ids, emails, tenant names, or fixture secrets that must not appear in CI artifacts.
 
 ---
 
