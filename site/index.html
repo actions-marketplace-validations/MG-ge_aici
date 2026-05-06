@@ -181,13 +181,13 @@
     .pass { color: #8be7b6; }
     .fail { color: #ffb2a9; }
     .muted { color: #8a97aa; }
-    .trust {
+    .credibility {
       display: grid;
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 10px;
       margin-top: 32px;
     }
-    .trust span {
+    .credibility span {
       padding: 11px 12px;
       color: var(--muted);
       background: rgba(255, 250, 240, 0.62);
@@ -314,6 +314,123 @@
     }
     .quote p { margin: 0; color: var(--muted); font-size: 18px; }
     .quote strong { display: block; margin-bottom: 8px; font-size: 20px; }
+    .fit-matrix {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .fit-col {
+      background: rgba(255, 250, 240, 0.78);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      padding: 26px;
+      box-shadow: 0 22px 70px rgba(50, 39, 26, 0.08);
+    }
+    .fit-col h3 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 18px;
+      font-size: 21px;
+      letter-spacing: -0.03em;
+    }
+    .tag {
+      border-radius: 999px;
+      padding: 4px 9px;
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .fit-col.yes .tag { color: var(--green); background: rgba(16, 114, 79, 0.12); }
+    .fit-col.no .tag { color: var(--red); background: rgba(180, 35, 24, 0.1); }
+    .fit-col ul {
+      display: grid;
+      gap: 13px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .fit-col li {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 11px;
+      color: var(--muted);
+    }
+    .mk {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      color: white;
+      font-size: 12px;
+      font-weight: 950;
+    }
+    .yes .mk { background: var(--green); }
+    .no .mk { background: var(--red); }
+    .promise-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      background: rgba(255, 250, 240, 0.74);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 22px 70px rgba(50, 39, 26, 0.08);
+    }
+    .promise {
+      min-height: 190px;
+      padding: 24px;
+      border-left: 1px solid var(--line);
+      border-top: 1px solid var(--line);
+    }
+    .promise:nth-child(-n+4) { border-top: 0; }
+    .promise:nth-child(4n+1) { border-left: 0; }
+    .promise .num {
+      margin-bottom: 13px;
+      color: var(--muted);
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 12px;
+      font-weight: 850;
+    }
+    .promise strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 17px;
+      letter-spacing: -0.02em;
+    }
+    .promise p { margin: 0; color: var(--muted); font-size: 15px; }
+    .final-cta {
+      padding: 34px;
+      color: #fff8ef;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(182, 92, 50, 0.38), transparent 22rem),
+        linear-gradient(135deg, #1c2730, #10151d);
+      border-radius: 34px;
+      box-shadow: 0 28px 90px rgba(16, 21, 31, 0.18);
+    }
+    .final-cta h2 { max-width: 760px; }
+    .final-cta p { max-width: 700px; color: #c9d2dd; font-size: 19px; }
+    .final-cta .install {
+      max-width: 760px;
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.12);
+    }
+    .final-notes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+      color: #c9d2dd;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .final-notes span {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      padding: 8px 11px;
+      background: rgba(255, 255, 255, 0.05);
+    }
     footer {
       display: flex;
       justify-content: space-between;
@@ -328,8 +445,13 @@
     @media (max-width: 920px) {
       main { padding-top: 30px; }
       .nav { margin-bottom: 38px; }
-      .hero, .grid, .example, .contrast { grid-template-columns: 1fr; }
-      .trust { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero, .grid, .example, .contrast, .fit-matrix { grid-template-columns: 1fr; }
+      .credibility { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .promise-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .promise:nth-child(-n+4) { border-top: 1px solid var(--line); }
+      .promise:nth-child(-n+2) { border-top: 0; }
+      .promise:nth-child(4n+1) { border-left: 1px solid var(--line); }
+      .promise:nth-child(2n+1) { border-left: 0; }
       .section-head { display: block; }
       .section-head p { margin-top: 12px; }
       .links { display: none; }
@@ -340,7 +462,13 @@
       .install { grid-template-columns: 1fr; padding: 16px; }
       .install code { white-space: normal; }
       .pill { justify-self: start; }
-      .trust { grid-template-columns: 1fr; }
+      .credibility, .promise-grid { grid-template-columns: 1fr; }
+      .promise, .promise:nth-child(-n+2), .promise:nth-child(2n+1) {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+      .promise:first-child { border-top: 0; }
+      .final-cta { padding: 24px; }
       pre { padding: 18px; }
     }
   </style>
@@ -390,7 +518,7 @@ Reports written to .aici/</code></pre>
       </div>
     </section>
 
-    <div class="trust" aria-label="Credibility">
+    <div class="credibility" aria-label="Credibility">
       <span>OpenAI</span>
       <span>Anthropic</span>
       <span>GitHub CI</span>
@@ -489,22 +617,99 @@ tests:
 
     <section aria-labelledby="fit">
       <div class="section-head">
-        <h2 id="fit">Built for teams that do not want a platform migration.</h2>
-        <p>Use Aici when you want release evidence and regression checks, not a full tracing, annotation, or governance suite.</p>
+        <h2 id="fit">Aici is for one specific person. Probably you. Maybe not.</h2>
+        <p>The product is intentionally narrow. It is better to know fit before you install than to discover a platform mismatch later.</p>
       </div>
-      <div class="grid">
-        <article class="quote">
-          <strong>I understand this.</strong>
-          <p>A YAML config describes what your LLM workflow should do. The CLI runs it and writes a pass/fail report.</p>
+      <div class="fit-matrix">
+        <article class="fit-col yes">
+          <h3>You will feel at home if <span class="tag">yes</span></h3>
+          <ul>
+            <li><span class="mk">✓</span><span>You ship LLM features in a real repo, on real branches, through pull requests.</span></li>
+            <li><span class="mk">✓</span><span>You have watched a prompt edit silently break a JSON field or tool call downstream.</span></li>
+            <li><span class="mk">✓</span><span>You already trust CI to gate normal code and want AI behavior to clear the same bar.</span></li>
+            <li><span class="mk">✓</span><span>You want a YAML file and report artifact, not another dashboard tab.</span></li>
+            <li><span class="mk">✓</span><span>Your team is small enough that a platform migration would slow you down.</span></li>
+          </ul>
         </article>
-        <article class="quote">
-          <strong>I trust this.</strong>
-          <p>Open-source, npm-published, CI-tested, provider-light, and designed without hosted prompt storage in v0.1.</p>
+        <article class="fit-col no">
+          <h3>Look elsewhere if <span class="tag">no</span></h3>
+          <ul>
+            <li><span class="mk">×</span><span>You need production tracing for every LLM call. Use a tracing/observability platform.</span></li>
+            <li><span class="mk">×</span><span>You want a UI for non-engineers to label outputs or manage annotation queues.</span></li>
+            <li><span class="mk">×</span><span>You need hosted prompt management with versioning, rollout controls, and approvals.</span></li>
+            <li><span class="mk">×</span><span>You need enterprise governance, SSO, audit logs, or procurement-ready compliance claims in v1.</span></li>
+            <li><span class="mk">×</span><span>You do not write tests for normal code. Aici will not fix that engineering culture.</span></li>
+          </ul>
         </article>
-        <article class="quote">
-          <strong>This is probably for me.</strong>
-          <p>If your app depends on structured LLM output or tool calls, Aici gives you a release gate before deploy.</p>
+      </div>
+    </section>
+
+    <section aria-labelledby="safety">
+      <div class="section-head">
+        <h2 id="safety">The boring promises that make this safe to install on a Friday.</h2>
+        <p>Most AI quality tools want to sit between you and your model. Aici sits next to your test runner instead.</p>
+      </div>
+      <div class="promise-grid">
+        <article class="promise">
+          <div class="num">01 / code</div>
+          <strong>Open source. MIT.</strong>
+          <p>The CLI, GitHub Action, schema, examples, and templates live in one repo you can inspect and fork.</p>
         </article>
+        <article class="promise">
+          <div class="num">02 / data</div>
+          <strong>No prompt storage.</strong>
+          <p>Prompts, fixtures, and reports stay in your repo and CI. Aici has no hosted prompt database in v0.1.</p>
+        </article>
+        <article class="promise">
+          <div class="num">03 / network</div>
+          <strong>No proxy. No SDK rewrite.</strong>
+          <p>Live checks call providers with your key during the test run. Production traffic does not pass through Aici.</p>
+        </article>
+        <article class="promise">
+          <div class="num">04 / adoption</div>
+          <strong>No account required.</strong>
+          <p>If you can run <code>npx</code>, you can evaluate the tool locally before adding it to CI.</p>
+        </article>
+        <article class="promise">
+          <div class="num">05 / scope</div>
+          <strong>One job.</strong>
+          <p>Catch LLM regressions before deploy. Hosted tracing, annotation, and generation are deliberately out of v1.</p>
+        </article>
+        <article class="promise">
+          <div class="num">06 / exit</div>
+          <strong>Easy to remove.</strong>
+          <p>Delete <code>aici.yml</code> and the workflow file. There is no data export or offboarding path to negotiate.</p>
+        </article>
+        <article class="promise">
+          <div class="num">07 / providers</div>
+          <strong>Provider-light.</strong>
+          <p>OpenAI, Anthropic, and OpenAI-compatible endpoints are supported without coupling tests to one vendor.</p>
+        </article>
+        <article class="promise">
+          <div class="num">08 / limits</div>
+          <strong>Clear v0.1 limits.</strong>
+          <p>No compliance certification claim, no hosted backend, and no guarantee about provider-side retention.</p>
+        </article>
+      </div>
+    </section>
+
+    <section aria-labelledby="final">
+      <div class="final-cta">
+        <h2 id="final">Add a release gate to your LLM in the time it takes to read this page.</h2>
+        <p>Initialize a config, commit the workflow, push a branch. The next time someone changes the prompt, the PR tells them what broke before users do.</p>
+        <div class="install" aria-label="Final install command">
+          <code>npx @mgicloud/aici init &amp;&amp; npx @mgicloud/aici run</code>
+          <button class="pill" type="button" aria-label="Copy final install command" data-copy="npx @mgicloud/aici init && npx @mgicloud/aici run">Copy</button>
+        </div>
+        <div class="actions">
+          <a class="button" href="https://github.com/MG-ge/aici#readme">Start in GitHub</a>
+          <a class="button secondary" href="https://github.com/MG-ge/aici/blob/main/docs/data-handling.md">Read data handling</a>
+        </div>
+        <div class="final-notes" aria-label="Setup notes">
+          <span>Exits non-zero on regression</span>
+          <span>Writes Markdown, JSON, and HTML reports</span>
+          <span>Works offline with mock fixtures</span>
+        </div>
       </div>
     </section>
 
