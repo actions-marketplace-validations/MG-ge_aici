@@ -3,740 +3,1177 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Aici catches LLM regressions before deploy with local and GitHub Actions quality gates for prompts, JSON output, tool calls, latency, and cost.">
+  <meta name="description" content="Aici is a small CLI and GitHub Action that fails pull requests when LLM prompts, JSON output, tool calls, latency, or cost regress.">
   <link rel="icon" href="data:,">
-  <title>Aici - Catch LLM regressions before deploy</title>
+  <title>Aici - fail the PR when the LLM regresses</title>
   <style>
     :root {
       color-scheme: light;
-      --ink: #10151d;
-      --muted: #647087;
-      --paper: #f4eee3;
-      --panel: #fffaf0;
-      --line: #ddd1bf;
-      --accent: #184f63;
-      --accent-2: #b65c32;
-      --green: #10724f;
-      --red: #b42318;
-      --code: #10151f;
-      --shadow: rgba(50, 39, 26, 0.16);
+      --paper: #fbf8ef;
+      --paper-2: #f1ebdf;
+      --ink: #1d232d;
+      --ink-2: #4a5362;
+      --ink-3: #7b8493;
+      --line: #ddd4c5;
+      --line-2: #cfc3b3;
+      --pass: #158455;
+      --pass-soft: #e1f3e9;
+      --fail: #bf392c;
+      --fail-soft: #f8e3df;
+      --warn: #b57912;
+      --term-bg: #1b212c;
+      --term-fg: #f3efe7;
+      --term-dim: #97a1b1;
+      --highlight: #fff2c9;
+      --shadow: 0 1px 0 rgba(29, 35, 45, 0.06), 0 1px 2px rgba(29, 35, 45, 0.05);
+      --shadow-lg: 0 24px 60px rgba(29, 35, 45, 0.1), 0 2px 6px rgba(29, 35, 45, 0.04);
+      --sans: "Avenir Next", "Trebuchet MS", "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", "Cascadia Mono", Consolas, monospace;
     }
+
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
-    :focus-visible {
-      outline: 3px solid rgba(24, 79, 99, 0.45);
-      outline-offset: 4px;
-    }
     body {
       margin: 0;
-      color: var(--ink);
       background:
-        radial-gradient(circle at 8% 10%, rgba(24, 79, 99, 0.22), transparent 29rem),
-        radial-gradient(circle at 86% 4%, rgba(182, 92, 50, 0.18), transparent 25rem),
-        linear-gradient(135deg, #f7f1e7 0%, #eadfce 100%);
-      font: 16px/1.55 ui-sans-serif, "Avenir Next", "Segoe UI", sans-serif;
+        radial-gradient(circle at 12% 12%, rgba(21, 132, 85, 0.09), transparent 28rem),
+        radial-gradient(circle at 82% 3%, rgba(191, 57, 44, 0.08), transparent 24rem),
+        var(--paper);
+      color: var(--ink);
+      font: 17px/1.55 var(--sans);
+      letter-spacing: -0.005em;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background-image: linear-gradient(to right, rgba(29, 35, 45, 0.025) 1px, transparent 1px);
+      background-size: 88px 100%;
+      mask-image: linear-gradient(to bottom, transparent, black 8%, black 92%, transparent);
     }
     a { color: inherit; }
-    main { max-width: 1180px; margin: 0 auto; padding: 44px 24px 54px; }
-    .nav {
+    code,
+    pre,
+    .mono {
+      font-family: var(--mono);
+      font-feature-settings: "calt" 0, "liga" 0;
+    }
+    :focus-visible {
+      outline: 3px solid rgba(21, 132, 85, 0.35);
+      outline-offset: 4px;
+    }
+    ::selection { background: var(--ink); color: var(--paper); }
+
+    .wrap {
+      width: min(1120px, calc(100% - 64px));
+      margin: 0 auto;
+    }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(251, 248, 239, 0.86);
+      backdrop-filter: blur(10px) saturate(1.1);
+      border-bottom: 1px solid var(--line);
+    }
+    .topbar-inner {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      gap: 18px;
-      margin-bottom: 58px;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 14px 0;
     }
     .brand {
       display: inline-flex;
       align-items: center;
-      flex: 0 0 auto;
       gap: 10px;
-      font-weight: 950;
-      letter-spacing: -0.04em;
-      font-size: 24px;
+      color: var(--ink);
+      font: 700 16px/1 var(--mono);
       text-decoration: none;
+      letter-spacing: -0.01em;
       white-space: nowrap;
     }
-    .mark {
-      flex: 0 0 34px;
-      width: 34px;
-      height: 34px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      box-shadow: 0 12px 30px rgba(24, 79, 99, 0.24);
+    .glyph {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 5px;
+      color: var(--paper);
+      background: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
     }
-    .brand-name { display: inline-block; }
-    .links {
+    .version {
+      margin-left: 2px;
+      color: var(--ink-3);
+      font-weight: 500;
+    }
+    .nav {
       display: flex;
       align-items: center;
-      gap: 14px;
-      color: var(--muted);
-      font-weight: 800;
-      font-size: 14px;
+      gap: 6px;
+      font: 600 13px/1 var(--mono);
     }
-    .links a { text-decoration: none; }
-    .links a:hover { color: var(--ink); }
+    .nav a {
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--ink-2);
+      text-decoration: none;
+    }
+    .nav a:hover { background: var(--paper-2); color: var(--ink); }
+    .nav .primary-link {
+      color: var(--paper);
+      background: var(--ink);
+    }
+    .nav .primary-link:hover { color: var(--paper); background: var(--ink); opacity: 0.92; }
+
+    main { position: relative; z-index: 1; }
+    section {
+      border-top: 1px solid var(--line);
+      padding: 96px 0;
+    }
     .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
-      gap: 34px;
-      align-items: center;
+      border-top: 0;
+      padding-top: 80px;
+      padding-bottom: 56px;
     }
-    .eyebrow {
-      color: var(--accent-2);
-      font-weight: 950;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin: 0 0 14px;
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px 6px 8px;
+      color: var(--ink-3);
+      background: rgba(251, 248, 239, 0.76);
+      font: 600 12px/1 var(--mono);
+      letter-spacing: 0.04em;
+    }
+    .kicker .pip {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--pass);
+      box-shadow: 0 0 0 4px rgba(21, 132, 85, 0.15);
     }
     h1 {
-      max-width: 790px;
-      margin: 0;
-      font-size: clamp(54px, 8vw, 104px);
-      letter-spacing: -0.08em;
-      line-height: 0.88;
+      max-width: 18ch;
+      margin: 0 0 24px;
+      font-size: clamp(42px, 6.4vw, 76px);
+      line-height: 0.98;
+      letter-spacing: -0.035em;
+      font-weight: 700;
+    }
+    h1 .strike {
+      color: var(--ink-3);
+      font-weight: 500;
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: var(--fail);
+    }
+    h1 em {
+      color: var(--ink-2);
+      font-style: normal;
+      font-weight: 600;
     }
     .lede {
-      max-width: 720px;
-      margin: 24px 0 0;
-      color: var(--muted);
-      font-size: clamp(19px, 2vw, 24px);
+      max-width: 60ch;
+      margin: 0 0 36px;
+      color: var(--ink-2);
+      font-size: clamp(17px, 1.4vw, 19px);
+      line-height: 1.6;
     }
+    .inline-code {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: var(--ink);
+      background: var(--paper-2);
+      font-family: var(--mono);
+      font-size: 0.92em;
+    }
+
     .install {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
-      align-items: center;
-      max-width: 690px;
-      margin-top: 28px;
-      padding: 10px 10px 10px 18px;
-      color: #e9f3f1;
-      background: var(--code);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      box-shadow: 0 18px 48px rgba(16, 21, 31, 0.18);
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
     }
-    .install code { overflow-x: auto; white-space: nowrap; }
-    code, pre { font-family: "SFMono-Regular", Consolas, monospace; font-size: 14px; }
-    .pill {
-      border: 0;
-      border-radius: 999px;
-      padding: 9px 13px;
-      color: white;
-      background: var(--accent);
-      font: inherit;
-      font-size: 13px;
-      font-weight: 900;
-    }
-    .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
-    .button {
+    .cmd {
       display: inline-flex;
       align-items: center;
-      min-height: 46px;
-      border-radius: 999px;
-      padding: 12px 18px;
-      color: white;
-      background: var(--accent);
-      text-decoration: none;
-      font-weight: 950;
-      box-shadow: 0 14px 32px rgba(24, 79, 99, 0.22);
-    }
-    .button.secondary {
-      color: var(--ink);
-      background: rgba(255, 250, 240, 0.58);
-      border: 1px solid var(--line);
-      box-shadow: none;
-    }
-    .panel {
-      position: relative;
-      background: rgba(255, 250, 240, 0.88);
-      border: 1px solid var(--line);
-      border-radius: 32px;
-      box-shadow: 0 28px 90px var(--shadow);
-      padding: 18px;
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 48px;
       overflow: hidden;
+      border: 1px solid var(--line-2);
+      border-radius: 10px;
+      padding: 0 6px 0 16px;
+      gap: 12px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+      font: 500 14.5px/1 var(--mono);
     }
-    .terminal {
-      color: #e9f3f1;
-      background: var(--code);
-      border-radius: 22px;
-      overflow: hidden;
+    .cmd .prompt {
+      color: var(--ink-3);
+      user-select: none;
     }
-    .terminal-bar {
+    .cmd code {
+      flex: 1;
+      overflow: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .cmd code::-webkit-scrollbar { display: none; }
+    .copy {
+      align-self: center;
+      height: 36px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 14px;
+      color: var(--paper);
+      background: var(--ink);
+      cursor: pointer;
+      font: 700 13px/1 var(--mono);
+      letter-spacing: 0.02em;
+    }
+    .copy:hover { opacity: 0.92; }
+    .copy.copied { background: var(--pass); }
+    .install-note {
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      color: var(--ink-3);
+      font: 600 12.5px/1.4 var(--mono);
+    }
+    .install-note span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .check { color: var(--pass); font-weight: 800; }
+
+    .pr-card {
+      margin-top: 48px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+      box-shadow: var(--shadow-lg);
+    }
+    .pr-head {
+      display: flex;
       align-items: center;
       gap: 12px;
-      padding: 14px 16px;
-      color: #78869b;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid var(--line);
+      padding: 14px 18px;
+      color: var(--ink-2);
+      background: var(--paper-2);
+      font: 500 13px/1.4 var(--mono);
+    }
+    .branch {
+      border: 1px solid var(--line-2);
+      border-radius: 4px;
+      padding: 2px 8px;
+      color: var(--ink);
+      background: var(--paper);
       font-size: 12px;
+    }
+    .right { margin-left: auto; color: var(--ink-3); font-size: 12px; }
+    .check-row {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      border-top: 1px solid var(--line);
+      padding: 14px 18px;
+    }
+    .check-row:first-of-type { border-top: 0; }
+    .icn {
+      display: grid;
+      place-items: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      font: 800 11px/1 var(--mono);
+    }
+    .icn.pass { color: var(--pass); background: var(--pass-soft); }
+    .icn.fail { color: var(--fail); background: var(--fail-soft); }
+    .check-name { color: var(--ink); font: 700 13.5px/1.3 var(--mono); }
+    .check-detail {
+      margin-top: 3px;
+      color: var(--ink-3);
+      font: 500 12px/1.45 var(--mono);
+    }
+    .check-meta {
+      color: var(--ink-3);
+      text-align: right;
+      white-space: nowrap;
+      font: 500 12px/1.4 var(--mono);
+    }
+    .pr-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding: 12px 18px;
+      color: var(--ink-3);
+      background: var(--paper-2);
+      font: 500 12px/1.4 var(--mono);
+    }
+    .verdict {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
       font-weight: 800;
     }
-    .dots { display: flex; gap: 7px; }
-    .dot { width: 10px; height: 10px; border-radius: 999px; background: #6e7b8f; }
-    .dot:nth-child(1) { background: #df6a4e; }
-    .dot:nth-child(2) { background: #d9b856; }
-    .dot:nth-child(3) { background: #5fbf83; }
-    pre { overflow-x: auto; margin: 0; padding: 22px; }
-    .pass { color: #8be7b6; }
-    .fail { color: #ffb2a9; }
-    .muted { color: #8a97aa; }
-    .credibility {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 32px;
+    .verdict.pass { color: var(--pass); }
+    .verdict.fail { color: var(--fail); }
+    .blob {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
     }
-    .credibility span {
-      padding: 11px 12px;
-      color: var(--muted);
-      background: rgba(255, 250, 240, 0.62);
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      text-align: center;
-      font-size: 13px;
-      font-weight: 850;
-    }
-    section { margin-top: 58px; }
-    .section-head {
+
+    .eyebrow {
       display: flex;
-      justify-content: space-between;
-      gap: 18px;
-      align-items: end;
-      margin-bottom: 18px;
-    }
-    h2 {
-      margin: 0;
-      font-size: clamp(30px, 4vw, 50px);
-      line-height: 0.96;
-      letter-spacing: -0.055em;
-    }
-    .section-head p {
-      max-width: 470px;
-      margin: 0;
-      color: var(--muted);
-      font-size: 18px;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-    .card {
-      background: rgba(255, 250, 240, 0.74);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 22px;
-    }
-    .card strong {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 18px;
-      letter-spacing: -0.02em;
-    }
-    .card p { margin: 0; color: var(--muted); }
-    .example {
-      display: grid;
-      grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
-      gap: 16px;
-    }
-    .report {
-      background: rgba(255, 250, 240, 0.82);
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 22px;
-      box-shadow: 0 22px 70px rgba(50, 39, 26, 0.1);
-    }
-    .report h3 { margin: 0 0 14px; font-size: 22px; letter-spacing: -0.03em; }
-    .row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      padding: 13px 0;
-      border-top: 1px solid var(--line);
-    }
-    .row:first-of-type { border-top: 0; }
-    .badge {
-      align-self: start;
-      border-radius: 999px;
-      padding: 4px 9px;
-      color: white;
-      background: var(--green);
-      font-size: 12px;
-      font-weight: 950;
-    }
-    .badge.bad { background: var(--red); }
-    .contrast {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-    .contrast article {
-      min-height: 210px;
-      padding: 26px;
-      border-radius: 28px;
-      border: 1px solid var(--line);
-    }
-    .contrast article:first-child {
-      color: #fff5ee;
-      background: linear-gradient(135deg, #2d3340, #141922);
-      box-shadow: 0 22px 70px rgba(16, 21, 31, 0.16);
-    }
-    .contrast article:last-child {
-      background: linear-gradient(135deg, rgba(16, 114, 79, 0.15), rgba(255, 250, 240, 0.82));
-      box-shadow: 0 22px 70px rgba(50, 39, 26, 0.1);
-    }
-    .contrast span {
-      display: inline-flex;
-      margin-bottom: 18px;
-      border-radius: 999px;
-      padding: 5px 10px;
-      color: inherit;
-      background: rgba(255, 255, 255, 0.12);
-      font-size: 12px;
-      font-weight: 950;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 18px;
+      color: var(--ink-3);
+      font: 700 12px/1 var(--mono);
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
-    .contrast h3 {
-      margin: 0 0 10px;
-      font-size: clamp(26px, 3vw, 42px);
-      line-height: 0.98;
-      letter-spacing: -0.055em;
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--ink-3);
     }
-    .contrast p { margin: 0; color: var(--muted); font-size: 18px; }
-    .contrast article:first-child p { color: #bdc7d6; }
-    .quote {
-      padding: 24px;
-      background: rgba(24, 79, 99, 0.09);
-      border: 1px solid rgba(24, 79, 99, 0.14);
-      border-radius: 28px;
+    h2 {
+      max-width: 22ch;
+      margin: 0 0 18px;
+      font-size: clamp(30px, 3.4vw, 44px);
+      line-height: 1.04;
+      letter-spacing: -0.025em;
+      font-weight: 700;
     }
-    .quote p { margin: 0; color: var(--muted); font-size: 18px; }
-    .quote strong { display: block; margin-bottom: 8px; font-size: 20px; }
-    .fit-matrix {
+    .section-lede {
+      max-width: 62ch;
+      margin: 0 0 48px;
+      color: var(--ink-2);
+      font-size: 18px;
+    }
+
+    .diff {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
+      box-shadow: var(--shadow-lg);
+    }
+    .pane {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .pane + .pane { border-left: 1px solid var(--line); }
+    .pane-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--line);
+      padding: 14px 18px;
+      color: var(--ink-2);
+      background: var(--paper-2);
+      font: 500 13px/1.4 var(--mono);
+    }
+    .pane-head .label { color: var(--ink-3); }
+    .pane-head .file { color: var(--ink); font-weight: 800; }
+    .yaml,
+    .run {
+      min-height: 340px;
+      margin: 0;
+      padding: 20px 22px;
+      overflow: auto;
+      font: 500 13.5px/1.7 var(--mono);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .yaml { color: var(--ink); background: var(--paper); }
+    .yaml .k { color: #315e9c; }
+    .yaml .s { color: #24734f; }
+    .yaml .c { color: var(--ink-3); font-style: italic; }
+    .yaml .pulse {
+      border-radius: 3px;
+      padding: 0 2px;
+      background: var(--highlight);
+      box-shadow: 0 0 0 1px #eadc9f;
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-top: 1px solid var(--line);
+      padding: 14px 18px;
+      background: var(--paper-2);
+    }
+    .pill {
+      border: 1px solid var(--line-2);
+      border-radius: 7px;
+      padding: 7px 11px;
+      color: var(--ink-2);
+      background: var(--paper);
+      cursor: pointer;
+      font: 700 12px/1.2 var(--mono);
+      transition: all 0.15s ease;
+    }
+    .pill:hover { border-color: var(--ink-3); color: var(--ink); }
+    .pill[aria-pressed="true"] {
+      border-color: var(--ink);
+      color: var(--paper);
+      background: var(--ink);
+    }
+    .pill[data-flavor="bad"][aria-pressed="true"] {
+      border-color: var(--fail);
+      background: var(--fail);
+    }
+    .pill[data-flavor="good"][aria-pressed="true"] {
+      border-color: var(--pass);
+      background: var(--pass);
+    }
+    .run {
+      flex: 1;
+      color: var(--term-fg);
+      background: var(--term-bg);
+    }
+    .run .dim { color: var(--term-dim); }
+    .run .ok { color: #8fe0b4; }
+    .run .err { color: #ff9b91; }
+    .run .warn { color: #f2c35a; }
+    .run .b { font-weight: 800; }
+    .run hr {
+      border: 0;
+      border-top: 1px dashed #4b5362;
+      margin: 12px 0;
+    }
+
+    .fit {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 24px;
     }
     .fit-col {
-      background: rgba(255, 250, 240, 0.78);
       border: 1px solid var(--line);
-      border-radius: 28px;
-      padding: 26px;
-      box-shadow: 0 22px 70px rgba(50, 39, 26, 0.08);
+      border-radius: 14px;
+      padding: 28px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
     }
     .fit-col h3 {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin: 0 0 18px;
-      font-size: 21px;
-      letter-spacing: -0.03em;
+      margin: 0 0 20px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
     }
     .tag {
-      border-radius: 999px;
-      padding: 4px 9px;
-      font-size: 11px;
-      font-weight: 950;
-      letter-spacing: 0.08em;
+      border-radius: 5px;
+      padding: 3px 8px;
+      font: 800 11px/1 var(--mono);
       text-transform: uppercase;
     }
-    .fit-col.yes .tag { color: var(--green); background: rgba(16, 114, 79, 0.12); }
-    .fit-col.no .tag { color: var(--red); background: rgba(180, 35, 24, 0.1); }
+    .yes .tag { color: var(--pass); background: var(--pass-soft); }
+    .no .tag { color: var(--fail); background: var(--fail-soft); }
     .fit-col ul {
       display: grid;
-      gap: 13px;
+      gap: 14px;
       margin: 0;
       padding: 0;
       list-style: none;
     }
     .fit-col li {
       display: grid;
-      grid-template-columns: 22px minmax(0, 1fr);
-      gap: 11px;
-      color: var(--muted);
+      grid-template-columns: 20px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      color: var(--ink-2);
+      font-size: 15.5px;
+      line-height: 1.5;
     }
     .mk {
       display: grid;
       place-items: center;
-      width: 22px;
-      height: 22px;
-      border-radius: 999px;
-      color: white;
-      font-size: 12px;
-      font-weight: 950;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      font: 800 12px/1 var(--mono);
     }
-    .yes .mk { background: var(--green); }
-    .no .mk { background: var(--red); }
-    .promise-grid {
+    .yes .mk { color: var(--pass); background: var(--pass-soft); }
+    .no .mk { color: var(--fail); background: var(--fail-soft); }
+
+    .trust {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      background: rgba(255, 250, 240, 0.74);
-      border: 1px solid var(--line);
-      border-radius: 28px;
       overflow: hidden;
-      box-shadow: 0 22px 70px rgba(50, 39, 26, 0.08);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--paper);
     }
-    .promise {
+    .trust-cell {
       min-height: 190px;
-      padding: 24px;
       border-left: 1px solid var(--line);
       border-top: 1px solid var(--line);
+      padding: 28px;
     }
-    .promise:nth-child(-n+4) { border-top: 0; }
-    .promise:nth-child(4n+1) { border-left: 0; }
-    .promise .num {
-      margin-bottom: 13px;
-      color: var(--muted);
-      font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: 12px;
-      font-weight: 850;
+    .trust-cell:nth-child(-n+4) { border-top: 0; }
+    .trust-cell:nth-child(4n+1) { border-left: 0; }
+    .trust-cell .num {
+      margin-bottom: 14px;
+      color: var(--ink-3);
+      font: 700 12px/1 var(--mono);
     }
-    .promise strong {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 17px;
+    .trust-cell h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .trust-cell p {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 14.5px;
+      line-height: 1.55;
+    }
+
+    .price-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .price {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 28px;
+      background: var(--paper);
+    }
+    .price.featured { border-color: var(--ink); box-shadow: var(--shadow-lg); }
+    .tier {
+      color: var(--ink-3);
+      font: 800 12px/1 var(--mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .amt {
+      font-size: 34px;
+      font-weight: 800;
+      line-height: 1;
       letter-spacing: -0.02em;
     }
-    .promise p { margin: 0; color: var(--muted); font-size: 15px; }
-    .final-cta {
-      padding: 34px;
-      color: #fff8ef;
-      background:
-        radial-gradient(circle at 18% 20%, rgba(182, 92, 50, 0.38), transparent 22rem),
-        linear-gradient(135deg, #1c2730, #10151d);
-      border-radius: 34px;
-      box-shadow: 0 28px 90px rgba(16, 21, 31, 0.18);
+    .per {
+      margin-left: 6px;
+      color: var(--ink-3);
+      font: 600 13px/1 var(--mono);
     }
-    .final-cta h2 { max-width: 760px; }
-    .final-cta p { max-width: 700px; color: #c9d2dd; font-size: 19px; }
-    .final-cta .install {
-      max-width: 760px;
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.12);
+    .price ul {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      color: var(--ink-2);
+      list-style: none;
+      font-size: 14.5px;
     }
-    .final-notes {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 16px;
-      color: #c9d2dd;
-      font-size: 14px;
+    .price li {
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+    }
+    .price li::before {
+      content: "+";
+      color: var(--ink-3);
+      font-family: var(--mono);
       font-weight: 800;
     }
-    .final-notes span {
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 999px;
-      padding: 8px 11px;
-      background: rgba(255, 255, 255, 0.05);
+    .cta {
+      margin-top: auto;
+      border: 1px solid var(--line-2);
+      border-radius: 8px;
+      padding: 11px 14px;
+      color: var(--ink);
+      background: var(--paper);
+      text-align: center;
+      text-decoration: none;
+      font: 800 13px/1.3 var(--mono);
     }
+    .featured .cta {
+      border-color: var(--ink);
+      color: var(--paper);
+      background: var(--ink);
+    }
+
+    .final {
+      margin: 0;
+      border-top-color: var(--ink);
+      color: var(--paper);
+      background: var(--ink);
+    }
+    .final h2 {
+      max-width: 20ch;
+      color: var(--paper);
+    }
+    .final p {
+      max-width: 60ch;
+      margin: 0 0 32px;
+      color: #c4ccd8;
+    }
+    .final .cmd {
+      border-color: #4b5362;
+      color: var(--paper);
+      background: #2a303b;
+    }
+    .final .cmd .prompt { color: #8e99aa; }
+    .final .copy {
+      color: var(--ink);
+      background: var(--paper);
+    }
+    .final .install-note { color: #b6bfcc; }
+
     footer {
-      display: flex;
-      justify-content: space-between;
-      gap: 18px;
-      margin-top: 54px;
-      padding-top: 22px;
       border-top: 1px solid var(--line);
-      color: var(--muted);
-      font-size: 14px;
+      padding: 36px 0 56px;
+      background: var(--paper);
     }
-    footer a { font-weight: 850; text-decoration: none; }
-    @media (max-width: 920px) {
-      main { padding-top: 30px; }
-      .nav { margin-bottom: 38px; }
-      .hero, .grid, .example, .contrast, .fit-matrix { grid-template-columns: 1fr; }
-      .credibility { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .promise-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .promise:nth-child(-n+4) { border-top: 1px solid var(--line); }
-      .promise:nth-child(-n+2) { border-top: 0; }
-      .promise:nth-child(4n+1) { border-left: 1px solid var(--line); }
-      .promise:nth-child(2n+1) { border-left: 0; }
-      .section-head { display: block; }
-      .section-head p { margin-top: 12px; }
-      .links { display: none; }
-      h1 { font-size: clamp(48px, 15vw, 78px); }
+    .foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 18px;
+      color: var(--ink-3);
+      font: 600 12.5px/1.5 var(--mono);
     }
-    @media (max-width: 520px) {
-      main { padding-inline: 20px; }
-      .install { grid-template-columns: 1fr; padding: 16px; }
-      .install code { white-space: normal; }
-      .pill { justify-self: start; }
-      .credibility, .promise-grid { grid-template-columns: 1fr; }
-      .promise, .promise:nth-child(-n+2), .promise:nth-child(2n+1) {
+    .foot a {
+      margin-right: 18px;
+      color: var(--ink-2);
+      text-decoration: none;
+    }
+    .foot a:hover { color: var(--ink); }
+
+    @media (max-width: 880px) {
+      .diff,
+      .fit,
+      .price-grid { grid-template-columns: 1fr; }
+      .pane + .pane {
         border-left: 0;
         border-top: 1px solid var(--line);
       }
-      .promise:first-child { border-top: 0; }
-      .final-cta { padding: 24px; }
-      pre { padding: 18px; }
+      .trust { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .trust-cell:nth-child(-n+4) { border-top: 1px solid var(--line); }
+      .trust-cell:nth-child(-n+2) { border-top: 0; }
+      .trust-cell:nth-child(4n+1) { border-left: 1px solid var(--line); }
+      .trust-cell:nth-child(2n+1) { border-left: 0; }
+    }
+    @media (max-width: 720px) {
+      .wrap { width: min(100% - 40px, 1120px); }
+      .hero { padding-top: 54px; }
+      section { padding: 72px 0; }
+      .hide-sm { display: none; }
+      .nav { gap: 2px; }
+      .nav a { padding-inline: 8px; }
+      h1 { font-size: clamp(40px, 13vw, 64px); }
+      .pr-head,
+      .pr-foot,
+      .check-row {
+        align-items: start;
+      }
+      .check-row {
+        grid-template-columns: 24px minmax(0, 1fr);
+      }
+      .check-meta {
+        grid-column: 2;
+        text-align: left;
+      }
+      .right { display: none; }
+      .cmd {
+        min-width: 100%;
+        height: auto;
+        min-height: 48px;
+        padding-top: 13px;
+        padding-bottom: 13px;
+        align-items: flex-start;
+      }
+      .cmd code {
+        white-space: normal;
+        word-break: break-word;
+      }
+      .copy {
+        height: 40px;
+      }
+      .trust { grid-template-columns: 1fr; }
+      .trust-cell,
+      .trust-cell:nth-child(-n+2),
+      .trust-cell:nth-child(2n+1) {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+      .trust-cell:first-child { border-top: 0; }
+      .yaml,
+      .run {
+        font-size: 12.5px;
+      }
     }
   </style>
 </head>
 <body>
-  <main>
-    <nav class="nav" aria-label="Product">
-      <a class="brand" href="#top" aria-label="Aici home"><span class="mark" aria-hidden="true"></span><span class="brand-name">Aici</span></a>
-      <div class="links" aria-label="Resources">
-        <a href="https://github.com/MG-ge/aici">GitHub</a>
-        <a href="https://github.com/MG-ge/aici/tree/main/docs">Docs</a>
-        <a href="https://www.npmjs.com/package/@mgicloud/aici">npm</a>
-        <a href="https://github.com/MG-ge/aici/releases/tag/v0.1.0">v0.1.0</a>
-      </div>
-    </nav>
-
-    <section class="hero" id="top">
-      <div>
-        <p class="eyebrow">AI quality gates for CI</p>
-        <h1>Catch LLM regressions before deploy.</h1>
-        <p class="lede">Aici is for developers shipping LLM features who need pull-request checks for prompts, JSON contracts, tool calls, latency, and cost without adopting a full observability platform.</p>
-        <div class="install" aria-label="Install command">
-          <code>npx @mgicloud/aici init</code>
-          <button class="pill" type="button" aria-label="Copy install command" data-copy="npx @mgicloud/aici init --config aici.yml">Copy</button>
-        </div>
-        <div class="actions">
-          <a class="button" href="https://github.com/MG-ge/aici#readme">Start in GitHub</a>
-          <a class="button secondary" href="https://github.com/MG-ge/aici/blob/main/docs/quickstart.md">Read docs</a>
-          <a class="button secondary" href="https://www.npmjs.com/package/@mgicloud/aici">View npm package</a>
-        </div>
-      </div>
-      <div class="panel" aria-label="Aici terminal example">
-        <div class="terminal">
-          <div class="terminal-bar">
-            <span class="dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
-            <span>pull request check</span>
-          </div>
-          <pre><code>$ aici run
-<span class="fail">FAIL</span> 1 test
-
-refund-policy-json
-  - jsonSchema: missing "reason"
-  - toolCall: expected lookup_order
-
-Reports written to .aici/</code></pre>
-        </div>
-      </div>
-    </section>
-
-    <div class="credibility" aria-label="Credibility">
-      <span>OpenAI</span>
-      <span>Anthropic</span>
-      <span>GitHub CI</span>
-      <span>JSON Schema</span>
-      <span>No prompt storage</span>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="Aici home">
+        <span class="glyph" aria-hidden="true">a</span>
+        <span>aici<span class="version">@0.1</span></span>
+      </a>
+      <nav class="nav" aria-label="Primary">
+        <a href="#how" class="hide-sm">how it works</a>
+        <a href="#fit" class="hide-sm">is it for you?</a>
+        <a href="#trust" class="hide-sm">safety</a>
+        <a href="#packaging">pricing</a>
+        <a href="https://github.com/MG-ge/aici" class="primary-link">github</a>
+      </nav>
     </div>
+  </header>
 
-    <section aria-labelledby="desire">
-      <div class="section-head">
-        <h2 id="desire">Stop finding AI regressions after users do.</h2>
-        <p>Aici gives AI changes the same release discipline as code changes: small tests, clear failures, and evidence attached to the pull request.</p>
-      </div>
-      <div class="contrast">
-        <article>
-          <span>Before</span>
-          <h3>A prompt change looks harmless until production behavior drifts.</h3>
-          <p>Schema fields disappear, required tools are skipped, latency jumps, or cost changes without a normal test failing.</p>
-        </article>
-        <article>
-          <span>After</span>
-          <h3>The pull request fails with the exact contract that changed.</h3>
-          <p>Developers see the broken JSON, missing tool call, latency guard, or cost guard before the change is merged.</p>
-        </article>
-      </div>
-    </section>
+  <main id="top">
+    <section class="hero">
+      <div class="wrap">
+        <div class="kicker"><span class="pip" aria-hidden="true"></span>v0.1.0 - open source - MIT</div>
+        <h1>Fail the <span class="strike">demo</span> <em>pull request</em><br> when the LLM regresses.</h1>
+        <p class="lede">Aici is a small CLI and GitHub Action that runs your prompts, JSON contracts, and tool calls against a few test cases, then exits non-zero when anything drifts. No dashboard. No tracing proxy. No sales call. It works the way <span class="inline-code">npm test</span> works.</p>
 
-    <section aria-labelledby="why">
-      <div class="section-head">
-        <h2 id="why">You already test code. Test AI behavior too.</h2>
-        <p>Prompt edits, model swaps, schema changes, and tool updates can silently break production behavior. Aici turns those risks into ordinary CI failures.</p>
-      </div>
-      <div class="grid">
-        <article class="card">
-          <strong>Fails pull requests</strong>
-          <p>Run the same checks locally and in GitHub Actions. If a configured expectation fails, the workflow exits non-zero.</p>
-        </article>
-        <article class="card">
-          <strong>Checks real AI contracts</strong>
-          <p>Validate exact text, contains, regex, JSON parse, JSON Schema, normalized tool calls, latency, and known cost.</p>
-        </article>
-        <article class="card">
-          <strong>Stays local-first</strong>
-          <p>No hosted prompt logging or proxy required. Reports are written as Markdown, JSON, and HTML artifacts in your CI run.</p>
-        </article>
-      </div>
-    </section>
-
-    <section aria-labelledby="example">
-      <div class="section-head">
-        <h2 id="example">A concrete failure, not another dashboard.</h2>
-        <p>Aici is deliberately small: define the behavior you expect, run it in CI, and keep the report with the pull request.</p>
-      </div>
-      <div class="example">
-        <div class="terminal">
-          <div class="terminal-bar">
-            <span class="dots" aria-hidden="true"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
-            <span>aici.yml</span>
+        <div class="install" aria-label="Install command">
+          <div class="cmd">
+            <span class="prompt" aria-hidden="true">$</span>
+            <code>npx @mgicloud/aici init --config aici.yml</code>
           </div>
-          <pre><code>version: 1
-tests:
-  - name: refund-policy-json
-    promptFile: prompt.md
-    inputFile: input.txt
-    expect:
-      contains:
-        - approved
-      jsonSchema: schema.json
-      maxCostUsd: 0.02</code></pre>
+          <button class="copy" type="button" aria-label="Copy install command" data-copy="npx @mgicloud/aici init --config aici.yml">Copy</button>
         </div>
-        <div class="report" aria-label="Example report">
-          <h3>AI release report</h3>
-          <div class="row">
-            <div>
-              <strong>refund-policy-json</strong>
-              <p>Output is valid JSON and matches the expected schema.</p>
-            </div>
-            <span class="badge">PASS</span>
+        <div class="install-note">
+          <span><span class="check">ok</span>10-minute setup</span>
+          <span><span class="check">ok</span>runs in your repo</span>
+          <span><span class="check">ok</span>no account required</span>
+        </div>
+
+        <div class="pr-card" aria-label="Example pull request check">
+          <div class="pr-head">
+            <span>PR #142</span>
+            <span class="branch">main</span>
+            <span aria-hidden="true">from</span>
+            <span class="branch">prompt/refund-tone</span>
+            <span class="right">aici - 4 checks</span>
           </div>
-          <div class="row">
+          <div class="check-row">
+            <span class="icn pass" aria-hidden="true">OK</span>
             <div>
-              <strong>forced-order-lookup-tool</strong>
-              <p>Expected `lookup_order`; model skipped the required tool call.</p>
+              <div class="check-name">refund-policy-json</div>
+              <div class="check-detail">JSON schema valid - contains "approved"</div>
             </div>
-            <span class="badge bad">FAIL</span>
+            <div class="check-meta">428ms - $0.0011</div>
           </div>
-          <div class="row">
+          <div class="check-row">
+            <span class="icn fail" aria-hidden="true">NO</span>
             <div>
-              <strong>cost guard</strong>
-              <p>Known provider cost stayed under the configured budget.</p>
+              <div class="check-name">order-lookup-tool-call</div>
+              <div class="check-detail">expected tool <span class="inline-code">lookup_order</span>, model returned plain text</div>
             </div>
-            <span class="badge">PASS</span>
+            <div class="check-meta">612ms - $0.0019</div>
+          </div>
+          <div class="check-row">
+            <span class="icn pass" aria-hidden="true">OK</span>
+            <div>
+              <div class="check-name">support-classifier-contains</div>
+              <div class="check-detail">all 6 fixtures returned a known label</div>
+            </div>
+            <div class="check-meta">2.1s - $0.0042</div>
+          </div>
+          <div class="check-row">
+            <span class="icn fail" aria-hidden="true">NO</span>
+            <div>
+              <div class="check-name">cost-budget</div>
+              <div class="check-detail">run cost $0.087 exceeded <span class="inline-code">maxCostUsd: 0.05</span></div>
+            </div>
+            <div class="check-meta">budget guard</div>
+          </div>
+          <div class="pr-foot">
+            <span class="verdict fail"><span class="blob" aria-hidden="true"></span>2 failed - merge blocked</span>
+            <span>posted by aici-bot - 4s ago</span>
           </div>
         </div>
       </div>
     </section>
 
-    <section aria-labelledby="fit">
-      <div class="section-head">
-        <h2 id="fit">Aici is for one specific person. Probably you. Maybe not.</h2>
-        <p>The product is intentionally narrow. It is better to know fit before you install than to discover a platform mismatch later.</p>
-      </div>
-      <div class="fit-matrix">
-        <article class="fit-col yes">
-          <h3>You will feel at home if <span class="tag">yes</span></h3>
-          <ul>
-            <li><span class="mk">✓</span><span>You ship LLM features in a real repo, on real branches, through pull requests.</span></li>
-            <li><span class="mk">✓</span><span>You have watched a prompt edit silently break a JSON field or tool call downstream.</span></li>
-            <li><span class="mk">✓</span><span>You already trust CI to gate normal code and want AI behavior to clear the same bar.</span></li>
-            <li><span class="mk">✓</span><span>You want a YAML file and report artifact, not another dashboard tab.</span></li>
-            <li><span class="mk">✓</span><span>Your team is small enough that a platform migration would slow you down.</span></li>
-          </ul>
-        </article>
-        <article class="fit-col no">
-          <h3>Look elsewhere if <span class="tag">no</span></h3>
-          <ul>
-            <li><span class="mk">×</span><span>You need production tracing for every LLM call. Use a tracing/observability platform.</span></li>
-            <li><span class="mk">×</span><span>You want a UI for non-engineers to label outputs or manage annotation queues.</span></li>
-            <li><span class="mk">×</span><span>You need hosted prompt management with versioning, rollout controls, and approvals.</span></li>
-            <li><span class="mk">×</span><span>You need enterprise governance, SSO, audit logs, or procurement-ready compliance claims in v1.</span></li>
-            <li><span class="mk">×</span><span>You do not write tests for normal code. Aici will not fix that engineering culture.</span></li>
-          </ul>
-        </article>
+    <section id="how">
+      <div class="wrap">
+        <div class="eyebrow">how it works</div>
+        <h2>Edit one line. Watch the PR turn red.</h2>
+        <p class="section-lede">Aici is just a YAML file and a CLI. Try a change below to see the same workflow you would run in <span class="inline-code">.github/workflows/aici.yml</span>, but live on this page.</p>
+
+        <div class="diff">
+          <div class="pane">
+            <div class="pane-head">
+              <span class="label">edit:</span>
+              <span class="file">aici.yml</span>
+              <span class="right" id="diff-status">no changes</span>
+            </div>
+            <pre class="yaml" id="yaml" aria-label="Example aici.yml"></pre>
+            <div class="controls" role="group" aria-label="Try a config change">
+              <button class="pill" type="button" data-flavor="neutral" data-mut="reset" aria-pressed="true">reset</button>
+              <button class="pill" type="button" data-flavor="bad" data-mut="schema" aria-pressed="false">break JSON schema</button>
+              <button class="pill" type="button" data-flavor="bad" data-mut="tool" aria-pressed="false">skip tool call</button>
+              <button class="pill" type="button" data-flavor="bad" data-mut="cost" aria-pressed="false">tighten cost budget</button>
+              <button class="pill" type="button" data-flavor="good" data-mut="fix" aria-pressed="false">add latency guard</button>
+            </div>
+          </div>
+          <div class="pane">
+            <div class="pane-head">
+              <span class="label">run:</span>
+              <span class="file">aici run</span>
+              <span class="right" id="run-status" aria-live="polite"><span class="verdict pass"><span class="blob" aria-hidden="true"></span>exit 0</span></span>
+            </div>
+            <pre class="run" id="run" aria-live="polite" aria-label="Aici run output"></pre>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section aria-labelledby="safety">
-      <div class="section-head">
-        <h2 id="safety">The boring promises that make this safe to install on a Friday.</h2>
-        <p>Most AI quality tools want to sit between you and your model. Aici sits next to your test runner instead.</p>
-      </div>
-      <div class="promise-grid">
-        <article class="promise">
-          <div class="num">01 / code</div>
-          <strong>Open source. MIT.</strong>
-          <p>The CLI, GitHub Action, schema, examples, and templates live in one repo you can inspect and fork.</p>
-        </article>
-        <article class="promise">
-          <div class="num">02 / data</div>
-          <strong>No prompt storage.</strong>
-          <p>Prompts, fixtures, and reports stay in your repo and CI. Aici has no hosted prompt database in v0.1.</p>
-        </article>
-        <article class="promise">
-          <div class="num">03 / network</div>
-          <strong>No proxy. No SDK rewrite.</strong>
-          <p>Live checks call providers with your key during the test run. Production traffic does not pass through Aici.</p>
-        </article>
-        <article class="promise">
-          <div class="num">04 / adoption</div>
-          <strong>No account required.</strong>
-          <p>If you can run <code>npx</code>, you can evaluate the tool locally before adding it to CI.</p>
-        </article>
-        <article class="promise">
-          <div class="num">05 / scope</div>
-          <strong>One job.</strong>
-          <p>Catch LLM regressions before deploy. Hosted tracing, annotation, and generation are deliberately out of v1.</p>
-        </article>
-        <article class="promise">
-          <div class="num">06 / exit</div>
-          <strong>Easy to remove.</strong>
-          <p>Delete <code>aici.yml</code> and the workflow file. There is no data export or offboarding path to negotiate.</p>
-        </article>
-        <article class="promise">
-          <div class="num">07 / providers</div>
-          <strong>Provider-light.</strong>
-          <p>OpenAI, Anthropic, and OpenAI-compatible endpoints are supported without coupling tests to one vendor.</p>
-        </article>
-        <article class="promise">
-          <div class="num">08 / limits</div>
-          <strong>Clear v0.1 limits.</strong>
-          <p>No compliance certification claim, no hosted backend, and no guarantee about provider-side retention.</p>
-        </article>
+    <section id="fit">
+      <div class="wrap">
+        <div class="eyebrow">is this for you?</div>
+        <h2>Aici is for one specific person. Probably you. Maybe not.</h2>
+        <p class="section-lede">Better to know fit before you install. Aici is intentionally a release gate, not a general AI platform.</p>
+
+        <div class="fit">
+          <article class="fit-col yes">
+            <h3>You will feel at home if <span class="tag">yes</span></h3>
+            <ul>
+              <li><span class="mk">+</span><span>You ship LLM features in a real repo, on real branches, through pull requests.</span></li>
+              <li><span class="mk">+</span><span>You have watched a prompt edit silently break a JSON field downstream.</span></li>
+              <li><span class="mk">+</span><span>You already trust CI to gate your code. AI behavior should clear the same bar.</span></li>
+              <li><span class="mk">+</span><span>You want a YAML file in your repo, not another dashboard tab.</span></li>
+              <li><span class="mk">+</span><span>Your team is small enough that platform migration is a real cost.</span></li>
+            </ul>
+          </article>
+          <article class="fit-col no">
+            <h3>Look elsewhere if <span class="tag">no</span></h3>
+            <ul>
+              <li><span class="mk">-</span><span>You need full production tracing of every LLM call. Use a tracing platform.</span></li>
+              <li><span class="mk">-</span><span>You want non-engineers to label outputs in annotation queues.</span></li>
+              <li><span class="mk">-</span><span>You want hosted prompt management with versioning and rollout controls.</span></li>
+              <li><span class="mk">-</span><span>You need enterprise governance, SSO, audit logs, or compliance claims in v1.</span></li>
+              <li><span class="mk">-</span><span>You do not write tests for normal code. Aici will not fix that culture.</span></li>
+            </ul>
+          </article>
+        </div>
       </div>
     </section>
 
-    <section aria-labelledby="final">
-      <div class="final-cta">
-        <h2 id="final">Add a release gate to your LLM in the time it takes to read this page.</h2>
+    <section id="trust">
+      <div class="wrap">
+        <div class="eyebrow">what we do not do</div>
+        <h2>The boring promises that make this safe to install on a Friday.</h2>
+        <p class="section-lede">Most AI quality tools want to sit between you and your model. Aici sits next to your test runner instead.</p>
+
+        <div class="trust">
+          <article class="trust-cell">
+            <div class="num">01 / code</div>
+            <h3>Open source. MIT.</h3>
+            <p>The CLI, GitHub Action, YAML schema, examples, and templates are in one repo you can inspect and fork.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="num">02 / data</div>
+            <h3>No prompt storage.</h3>
+            <p>Your prompts, fixtures, and outputs stay in your repo and CI. Aici has no hosted prompt database in v0.1.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="num">03 / network</div>
+            <h3>No proxy. No SDK rewrite.</h3>
+            <p>Live checks call OpenAI or Anthropic with your key during a run. Production traffic does not pass through Aici.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="num">04 / price</div>
+            <h3>Free is the real product.</h3>
+            <p>The CLI and Action are free. Hosted history may become paid later, but the release gate is not a fake free tier.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="num">05 / sales</div>
+            <h3>No book-a-demo wall.</h3>
+            <p>There is a README, npm package, GitHub Action, examples, and docs. You can evaluate it without a call.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="num">06 / scope</div>
+            <h3>One job.</h3>
+            <p>Catch LLM regressions before deploy. Hosted tracing, annotation, and generation are deliberately out of v1.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="num">07 / exit</div>
+            <h3>Easy to leave.</h3>
+            <p>Delete <span class="inline-code">aici.yml</span> and the workflow file. No data export or offboarding email.</p>
+          </article>
+          <article class="trust-cell">
+            <div class="num">08 / model</div>
+            <h3>Provider-light.</h3>
+            <p>OpenAI, Anthropic, and OpenAI-compatible endpoints are supported without coupling tests to one vendor.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="packaging">
+      <div class="wrap">
+        <div class="eyebrow">packaging</div>
+        <h2>Free is the whole v0.1 product. Paid is future convenience.</h2>
+        <p class="section-lede">You can ship Aici in production CI without paying. Future paid surfaces should add hosted memory and team visibility, not take away the local release gate.</p>
+
+        <div class="price-grid">
+          <article class="price">
+            <div class="tier">Open source</div>
+            <div class="amt">EUR 0<span class="per">/ forever</span></div>
+            <ul>
+              <li>CLI and GitHub Action</li>
+              <li>JSON Schema, text, regex, tool-call, cost, and latency checks</li>
+              <li>Markdown, JSON, and HTML reports</li>
+              <li>Template packs for support, extraction, and agents</li>
+              <li>OpenAI, Anthropic, and OpenAI-compatible providers</li>
+            </ul>
+            <a class="cta" href="https://github.com/MG-ge/aici">View GitHub</a>
+          </article>
+          <article class="price featured">
+            <div class="tier">Hosted history</div>
+            <div class="amt">planned<span class="per">/ not sold yet</span></div>
+            <ul>
+              <li>Run history across pull requests</li>
+              <li>Pass rate, cost, and latency trends</li>
+              <li>Flake detection for unstable checks</li>
+              <li>Private projects if demand exists</li>
+              <li>Built only after user validation</li>
+            </ul>
+            <a class="cta" href="https://github.com/MG-ge/aici/issues/new?template=feedback.yml">Request it</a>
+          </article>
+          <article class="price">
+            <div class="tier">Team controls</div>
+            <div class="amt">later<span class="per">/ demand-gated</span></div>
+            <ul>
+              <li>Shared projects across a team</li>
+              <li>Slack or email regression alerts</li>
+              <li>Larger fixture suites</li>
+              <li>Policy presets for sensitive repos</li>
+              <li>No enterprise claims in v0.1</li>
+            </ul>
+            <a class="cta" href="https://github.com/MG-ge/aici/issues/new?template=feedback.yml">Give feedback</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="final">
+      <div class="wrap">
+        <div class="eyebrow">try it now</div>
+        <h2>Add a release gate to your LLM in the time it takes to read this page.</h2>
         <p>Initialize a config, commit the workflow, push a branch. The next time someone changes the prompt, the PR tells them what broke before users do.</p>
         <div class="install" aria-label="Final install command">
-          <code>npx @mgicloud/aici init &amp;&amp; npx @mgicloud/aici run</code>
-          <button class="pill" type="button" aria-label="Copy final install command" data-copy="npx @mgicloud/aici init && npx @mgicloud/aici run">Copy</button>
+          <div class="cmd">
+            <span class="prompt" aria-hidden="true">$</span>
+            <code>npx @mgicloud/aici init &amp;&amp; npx @mgicloud/aici run</code>
+          </div>
+          <button class="copy" type="button" aria-label="Copy final install command" data-copy="npx @mgicloud/aici init && npx @mgicloud/aici run">Copy</button>
         </div>
-        <div class="actions">
-          <a class="button" href="https://github.com/MG-ge/aici#readme">Start in GitHub</a>
-          <a class="button secondary" href="https://github.com/MG-ge/aici/blob/main/docs/data-handling.md">Read data handling</a>
-        </div>
-        <div class="final-notes" aria-label="Setup notes">
-          <span>Exits non-zero on regression</span>
-          <span>Writes Markdown, JSON, and HTML reports</span>
-          <span>Works offline with mock fixtures</span>
+        <div class="install-note">
+          <span><span class="check">ok</span>exits non-zero on regression</span>
+          <span><span class="check">ok</span>writes Markdown report</span>
+          <span><span class="check">ok</span>works offline with mock fixtures</span>
         </div>
       </div>
     </section>
-
-    <footer>
-      <span>Aici is open-source AI CI for teams shipping LLM features.</span>
-      <span><a href="https://github.com/MG-ge/aici">GitHub</a> · <a href="https://github.com/MG-ge/aici/issues/new?template=feedback.yml">Feedback</a> · <a href="https://www.npmjs.com/package/@mgicloud/aici">npm</a></span>
-    </footer>
   </main>
+
+  <footer>
+    <div class="wrap foot">
+      <div>
+        <a href="https://github.com/MG-ge/aici">github</a>
+        <a href="https://www.npmjs.com/package/@mgicloud/aici">npm</a>
+        <a href="https://github.com/MG-ge/aici/tree/main/docs">docs</a>
+        <a href="https://github.com/MG-ge/aici/blob/main/CHANGELOG.md">changelog</a>
+        <a href="https://github.com/MG-ge/aici/blob/main/SECURITY.md">security</a>
+      </div>
+      <div>aici - v0.1.0 - MIT - local-first AI CI</div>
+    </div>
+  </footer>
 
   <script>
     for (const button of document.querySelectorAll("[data-copy]")) {
       button.addEventListener("click", async () => {
-        const value = button.getAttribute("data-copy");
+        const original = button.textContent;
         try {
-          await navigator.clipboard.writeText(value);
+          await navigator.clipboard.writeText(button.dataset.copy);
           button.textContent = "Copied";
+          button.classList.add("copied");
           button.setAttribute("aria-label", "Install command copied");
           setTimeout(() => {
-            button.textContent = "Copy";
-            button.setAttribute("aria-label", "Copy install command");
-          }, 1400);
+            button.textContent = original;
+            button.classList.remove("copied");
+            button.setAttribute("aria-label", button.dataset.copy.includes("&&") ? "Copy final install command" : "Copy install command");
+          }, 1300);
         } catch {
           button.textContent = "Copy failed";
           button.setAttribute("aria-label", "Copy install command failed");
         }
       });
     }
+
+    const yamlEl = document.getElementById("yaml");
+    const runEl = document.getElementById("run");
+    const diffStatus = document.getElementById("diff-status");
+    const runStatus = document.getElementById("run-status");
+    const BASE = {
+      schemaField: "reason",
+      toolRequired: true,
+      costBudget: 0.05,
+      latencyGuard: false
+    };
+
+    function renderYaml(state, mutation) {
+      const k = (text) => `<span class="k">${text}</span>`;
+      const s = (text) => `<span class="s">${text}</span>`;
+      const c = (text) => `<span class="c">${text}</span>`;
+      const pulse = (line, active) => active ? `<span class="pulse">${line}</span>` : line;
+      const schemaLine = pulse(`    ${k("jsonSchema")}: ${s(state.schemaField === "reason" ? "schema.json" : "schema.json  # field reason removed")}`, mutation === "schema");
+      const toolLine = state.toolRequired
+        ? pulse(`      - ${k("name")}: ${s("lookup_order")}`, mutation === "tool")
+        : pulse(`      ${c("# tool requirement removed")}`, mutation === "tool");
+      const costLine = pulse(`    ${k("maxCostUsd")}: ${s(String(state.costBudget))}`, mutation === "cost");
+      const latencyLine = state.latencyGuard ? pulse(`    ${k("maxLatencyMs")}: ${s("800")}`, mutation === "fix") : "";
+
+      return [
+        `${k("version")}: ${s("1")}`,
+        `${k("tests")}:`,
+        `  - ${k("name")}: ${s("refund-policy-json")}`,
+        `    ${k("promptFile")}: ${s("prompts/refund.md")}`,
+        `    ${k("expect")}:`,
+        `      ${k("contains")}: [${s('"approved"')}]`,
+        schemaLine,
+        costLine,
+        latencyLine,
+        `  - ${k("name")}: ${s("order-lookup-tool-call")}`,
+        `    ${k("inputFile")}: ${s("fixtures/order-A123.txt")}`,
+        `    ${k("expect")}:`,
+        `      ${k("toolCalls")}:`,
+        toolLine
+      ].filter(Boolean).join("\n");
+    }
+
+    function renderRun(state, mutation) {
+      const lines = [];
+      const time = new Date().toLocaleTimeString("en-GB");
+      const schemaFail = mutation === "schema";
+      const costFail = mutation === "cost";
+      const toolFail = mutation === "tool";
+      const failed = (schemaFail ? 1 : 0) + (costFail ? 1 : 0) + (toolFail ? 1 : 0);
+      const passed = 2 - Math.min(failed, 2);
+
+      lines.push(`<span class="dim">$ aici run --config aici.yml</span>`);
+      lines.push(`<span class="dim">[${time}] loading 2 tests - mock fixture run</span>`);
+      lines.push("");
+
+      if (schemaFail) {
+        lines.push(`  <span class="err">FAIL</span>  <span class="b">refund-policy-json</span>`);
+        lines.push(`     <span class="dim">jsonSchema:</span> required field <span class="err">"reason"</span> not present in output`);
+        lines.push(`     <span class="dim">expected:</span> { "decision": "approved", "reason": "&lt;string&gt;" }`);
+        lines.push(`     <span class="dim">actual:</span>   { "decision": "approved" }`);
+      } else if (costFail) {
+        lines.push(`  <span class="err">FAIL</span>  <span class="b">refund-policy-json</span>`);
+        lines.push(`     <span class="dim">maxCostUsd:</span> $0.087 > $${state.costBudget.toFixed(2)} budget`);
+        lines.push(`     <span class="dim">hint:</span> expensive retry path detected`);
+      } else {
+        lines.push(`  <span class="ok">PASS</span>  <span class="b">refund-policy-json</span>  <span class="dim">428ms - $0.0011</span>`);
+        if (state.latencyGuard) lines.push(`     <span class="dim">latency:</span> 428ms < 800ms <span class="ok">PASS</span>`);
+      }
+
+      if (toolFail) {
+        lines.push(`  <span class="err">FAIL</span>  <span class="b">order-lookup-tool-call</span>`);
+        lines.push(`     <span class="dim">toolCalls:</span> expected tool requirement removed`);
+        lines.push(`     <span class="warn">WARN</span> model can now skip lookup_order silently`);
+      } else {
+        lines.push(`  <span class="ok">PASS</span>  <span class="b">order-lookup-tool-call</span>  <span class="dim">612ms - $0.0019</span>`);
+        lines.push(`     <span class="dim">tool:</span> <span class="ok">lookup_order(id="A123")</span>`);
+      }
+
+      lines.push("<hr>");
+      if (failed > 0) {
+        lines.push(`  <span class="err">${failed} failed</span> - <span class="ok">${passed} passed</span> <span class="dim">-> wrote .aici/aici-report.md</span>`);
+        lines.push(`  <span class="err">exit 1</span> <span class="dim">-> pull request blocked</span>`);
+      } else {
+        lines.push(`  <span class="ok">2 passed</span> - 0 failed <span class="dim">-> wrote .aici/aici-report.md</span>`);
+        lines.push(`  <span class="ok">exit 0</span> <span class="dim">-> pull request green</span>`);
+      }
+      return lines.join("\n");
+    }
+
+    function setRunStatus(failedCount) {
+      runStatus.innerHTML = failedCount > 0
+        ? `<span class="verdict fail"><span class="blob" aria-hidden="true"></span>exit 1</span>`
+        : `<span class="verdict pass"><span class="blob" aria-hidden="true"></span>exit 0</span>`;
+    }
+
+    function applyMutation(mutation) {
+      const state = { ...BASE };
+      let label = "no changes";
+      if (mutation === "schema") {
+        state.schemaField = "missing";
+        label = "edited line 7 - jsonSchema";
+      }
+      if (mutation === "tool") {
+        state.toolRequired = false;
+        label = "edited line 14 - toolCalls";
+      }
+      if (mutation === "cost") {
+        state.costBudget = 0.01;
+        label = "edited line 8 - maxCostUsd";
+      }
+      if (mutation === "fix") {
+        state.latencyGuard = true;
+        label = "added line 9 - maxLatencyMs";
+      }
+      diffStatus.textContent = label;
+      yamlEl.innerHTML = renderYaml(state, mutation);
+      runEl.innerHTML = renderRun(state, mutation);
+      setRunStatus(["schema", "tool", "cost"].includes(mutation) ? 1 : 0);
+    }
+
+    for (const button of document.querySelectorAll(".controls .pill")) {
+      button.addEventListener("click", () => {
+        for (const item of document.querySelectorAll(".controls .pill")) item.setAttribute("aria-pressed", "false");
+        button.setAttribute("aria-pressed", "true");
+        applyMutation(button.dataset.mut);
+      });
+    }
+    applyMutation("reset");
   </script>
 </body>
 </html>
