@@ -2,9 +2,20 @@
 
 > Catch LLM regressions before deploy.
 
-**Status:** V1 release candidate  
+**Status:** v0.1.0 launched
 **Last updated:** 2026-05-06
 **Owner:** MG
+
+---
+
+## Install
+
+```bash
+npx @mgicloud/aici init --config aici.yml
+npx @mgicloud/aici run --config aici.yml
+```
+
+Use `aici.yml` to test prompt behavior, JSON contracts, tool calls, cost, and latency before a pull request is merged.
 
 ---
 
