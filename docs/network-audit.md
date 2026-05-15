@@ -1,6 +1,6 @@
 # Network Audit
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-05-15
 
 Aici is designed as a no-phone-home AI quality gate. The CLI has no Aici-hosted backend and no telemetry. Live checks call only the model provider endpoints configured in `aici.yml`.
 
@@ -10,6 +10,7 @@ Use `aici audit` to make that claim reviewable before a workflow runs.
 npx @mgicloud/aici audit --config aici.yml
 npx @mgicloud/aici audit --config aici.yml --json
 npx @mgicloud/aici audit --config aici.yml --allow-provider-endpoint https://api.openai.com/v1/responses
+npx @mgicloud/aici run --config aici.yml --allow-provider-endpoint https://api.openai.com/v1/responses
 ```
 
 ## What The Audit Shows
@@ -50,6 +51,17 @@ npx @mgicloud/aici audit \
 
 If any configured provider endpoint is not listed, the command exits non-zero after printing the audit report.
 
+Use the same allowlist on `aici run` for live jobs:
+
+```bash
+npx @mgicloud/aici run \
+  --config aici.yml \
+  --allow-provider-endpoint https://api.openai.com/v1/responses \
+  --allow-provider-endpoint https://api.anthropic.com/v1/messages
+```
+
+When the run allowlist is set, Aici validates the config endpoints before executing tests. If a config points at an unapproved endpoint, the command exits before provider API keys are read and before any provider request is sent.
+
 Use `--json` when CI needs a custom machine-readable policy:
 
 ```bash
@@ -76,4 +88,4 @@ In v0.1, Aici has no judge provider. All checks are deterministic local checks o
 
 ## Limits
 
-`aici audit` is a static config and package audit. It is not a network sandbox and does not intercept arbitrary process traffic. For high-security CI, combine it with runner-level egress controls, dependency review, and pinned versions.
+Aici's provider client enforces that each provider request URL matches the endpoint printed by `aici audit`. `aici run --allow-provider-endpoint` adds a policy gate before provider API keys are read. These controls apply to Aici's own provider calls; they are not a process-level network sandbox and do not intercept arbitrary traffic from other commands running in the same CI job. For high-security CI, combine them with runner-level egress controls, dependency review, pinned versions, and a provider-secret workflow that only runs after config changes are trusted.

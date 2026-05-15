@@ -1,6 +1,6 @@
 # Quickstart
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-05-15
 
 ## 1. Install
 
@@ -59,6 +59,16 @@ npx @mgicloud/aici audit --config aici.yml --json
 
 Fixture-only configs show no provider endpoints. Live provider configs show the exact OpenAI, Anthropic, or OpenAI-compatible endpoint Aici may call. Aici has no telemetry and no remote Aici backend.
 
+For live CI jobs, enforce the endpoint allowlist on the run itself:
+
+```bash
+npx @mgicloud/aici run \
+  --config aici.yml \
+  --allow-provider-endpoint https://api.openai.com/v1/responses
+```
+
+If the config contains another provider endpoint, Aici exits before reading provider API keys or sending provider requests.
+
 ## 6. Add GitHub Actions
 
 ```yaml
@@ -87,3 +97,5 @@ jobs:
 ```
 
 Store provider keys as GitHub Actions secrets. Do not commit `.env` files or raw API keys.
+
+Keep pull-request workflows fixture-only for untrusted PRs. Run live provider checks with secrets only in trusted workflows, and set `allowed-provider-endpoints` for those jobs.

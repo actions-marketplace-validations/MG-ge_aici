@@ -1,6 +1,6 @@
 # Security
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-05-15
 
 ## V1 Security Model
 
@@ -34,6 +34,7 @@ Recommended defaults:
 
 - Use fixture outputs for broad regression coverage.
 - Run `aici audit --json` before enabling live provider checks in CI.
+- Add `--allow-provider-endpoint` to live `aici run` jobs so unapproved endpoints fail before provider API keys are read.
 - Use live provider calls only for smoke tests and critical prompts.
 - Keep provider keys in GitHub Actions secrets.
 - Do not run live checks with provider secrets against untrusted PR configs, prompts, schemas, or tool definitions. The GitHub Action defaults to blocking guarded provider secret env vars during pull-request events unless `allow-provider-secrets: true` is set.
@@ -42,12 +43,11 @@ Recommended defaults:
 
 ## Project Hardening
 
-This repository includes GitHub workflows for:
+This repository is intended to be checked with:
 
-- `npm audit --audit-level=moderate`.
-- Dependency Review on pull requests.
-- CodeQL JavaScript/TypeScript analysis.
-- Dependabot updates for npm packages and GitHub Actions.
+- `npm run security:audit`, which runs `npm audit --audit-level=moderate`.
+- `npm run verify`, which runs type checks, tests, build, sample runs, config validation, and schema sync checks.
+- Dependency Review, CodeQL JavaScript/TypeScript analysis, and Dependabot updates when GitHub Actions quota is available.
 
 The static Cloudflare Pages site includes `site/_headers` for HTTPS, content-type, frame, permissions, referrer, and CSP headers.
 
@@ -94,4 +94,4 @@ Use `aici audit --json` for CI allowlists instead of grepping human output.
 - No production secrets manager.
 - No compliance certification claim.
 - No guarantee that provider-side error bodies omit all sensitive data before local redaction.
-- `aici audit` is a static config/package audit, not a process-level network sandbox. Use CI runner egress controls for strict network enforcement.
+- Aici enforces provider endpoint allowlists for its own live provider calls, but it is not a process-level network sandbox. Use CI runner egress controls for strict network enforcement across every command in a job.

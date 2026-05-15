@@ -101,9 +101,10 @@ Network audit:
 npm run dev -- audit --config aici.yml
 npm run dev -- audit --config aici.yml --json
 npm run dev -- audit --config examples/openai/aici.yml --allow-provider-endpoint https://api.openai.com/v1/responses
+npm run dev -- run --config examples/openai/aici.yml --allow-provider-endpoint https://api.openai.com/v1/responses
 ```
 
-The audit prints configured provider endpoints, runtime dependencies, source summary, and the network policy. Fixture-only configs show no provider endpoints.
+The audit prints configured provider endpoints, runtime dependencies, source summary, and the network policy. Fixture-only configs show no provider endpoints. The same `--allow-provider-endpoint` option can be used on `run` so live jobs reject unapproved endpoints before reading provider API keys.
 
 Failure-path sample:
 
@@ -144,7 +145,7 @@ Live provider scripts expect `OPENAI_API_KEY` or `ANTHROPIC_API_KEY` in the envi
 
 The default sample stays provider-free so CI and local checks remain deterministic.
 
-Do not run live provider checks with provider secrets against untrusted pull request configs, prompts, schemas, or tool definitions. The GitHub Action blocks guarded provider secret env vars on pull-request events unless `allow-provider-secrets: true` is set.
+Do not run live provider checks with provider secrets against untrusted pull request configs, prompts, schemas, or tool definitions. The GitHub Action blocks guarded provider secret env vars on pull-request events unless `allow-provider-secrets: true` is set. For trusted live jobs, set `allowed-provider-endpoints` so config endpoint changes fail before provider secrets are read.
 
 Config schema:
 

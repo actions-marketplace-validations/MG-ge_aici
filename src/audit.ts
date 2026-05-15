@@ -143,6 +143,14 @@ export function findDisallowedProviderEndpoints(
     }));
 }
 
+export function assertAllowedProviderEndpoints(report: AuditReport, allowedEndpoints: string[]): void {
+  const violations = findDisallowedProviderEndpoints(report, allowedEndpoints);
+
+  if (violations.length > 0) {
+    throw new Error(renderEndpointViolations(violations).trimEnd());
+  }
+}
+
 export function renderEndpointViolations(violations: AuditEndpointViolation[]): string {
   const lines = ["Aici audit failed: unapproved provider endpoints."];
 

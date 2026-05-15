@@ -168,6 +168,64 @@ test("rejects baseUrl for official providers before provider calls", async () =>
   );
 });
 
+test("rejects remote plain-http openai-compatible endpoints before provider calls", async () => {
+  process.env.AICI_TEST_API_KEY = "test-key";
+  let called = false;
+
+  globalThis.fetch = async () => {
+    called = true;
+    return jsonResponse({});
+  };
+
+  await assert.rejects(
+    callProvider(
+      {
+        type: "openai-compatible",
+        apiKeyEnv: "AICI_TEST_API_KEY",
+        baseUrl: "http://models.example.test/v1",
+        model: "test-model",
+      },
+      toolTest("remote-http-base-url"),
+      "Check order A123.",
+      process.cwd(),
+    ),
+    /Provider baseUrl must use https/,
+  );
+  assert.equal(called, false);
+});
+
+test("allows localhost plain-http openai-compatible endpoints for local models", async () => {
+  process.env.AICI_TEST_API_KEY = "test-key";
+  let requestUrl = "";
+
+  globalThis.fetch = async (url) => {
+    requestUrl = String(url);
+    return jsonResponse({
+      choices: [
+        {
+          message: {
+            content: "ok",
+          },
+        },
+      ],
+    });
+  };
+
+  await callProvider(
+    {
+      type: "openai-compatible",
+      apiKeyEnv: "AICI_TEST_API_KEY",
+      baseUrl: "http://localhost:11434/v1/",
+      model: "local-model",
+    },
+    toolTest("local-http-base-url"),
+    "Return ok.",
+    process.cwd(),
+  );
+
+  assert.equal(requestUrl, "http://localhost:11434/v1/chat/completions");
+});
+
 function chatProvider(): AiciProvider {
   return {
     type: "openai-compatible",

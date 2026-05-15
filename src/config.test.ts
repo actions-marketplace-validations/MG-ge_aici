@@ -50,6 +50,66 @@ tests:
   });
 });
 
+test("provider config allows local http only for openai-compatible baseUrl", async () => {
+  await withConfig(`
+version: 1
+provider:
+  type: openai-compatible
+  model: local-model
+  baseUrl: http://localhost:11434/v1
+tests:
+  - name: local-compatible-smoke
+    mockOutput: ok
+`, async (configPath) => {
+    const loaded = await loadConfig(configPath);
+    assert.equal(loaded.config.provider?.baseUrl, "http://localhost:11434/v1");
+  });
+
+  await assert.rejects(
+    withConfig(`
+version: 1
+provider:
+  type: openai-compatible
+  model: test-model
+  baseUrl: http://models.example.test/v1
+tests:
+  - name: remote-http-compatible-smoke
+    mockOutput: ok
+`, (configPath) => loadConfig(configPath)),
+    /baseUrl is invalid: Provider baseUrl must use https/,
+  );
+});
+
+test("provider config rejects openai-compatible baseUrl credentials and query strings", async () => {
+  await assert.rejects(
+    withConfig(`
+version: 1
+provider:
+  type: openai-compatible
+  model: test-model
+  baseUrl: https://user:pass@models.example.test/v1
+tests:
+  - name: compatible-smoke
+    mockOutput: ok
+`, (configPath) => loadConfig(configPath)),
+    /baseUrl is invalid: Provider baseUrl must not include credentials/,
+  );
+
+  await assert.rejects(
+    withConfig(`
+version: 1
+provider:
+  type: openai-compatible
+  model: test-model
+  baseUrl: https://models.example.test/v1?tenant=one
+tests:
+  - name: compatible-smoke
+    mockOutput: ok
+`, (configPath) => loadConfig(configPath)),
+    /baseUrl is invalid: Provider baseUrl must not include query strings or fragments/,
+  );
+});
+
 test("provider config rejects baseUrl for official providers", async () => {
   await assert.rejects(
     withConfig(`

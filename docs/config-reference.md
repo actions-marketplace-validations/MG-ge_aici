@@ -1,6 +1,6 @@
 # Config Reference
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-05-15
 
 ---
 
@@ -153,7 +153,7 @@ tests:
 | `model` | yes | Provider model id |
 | `api` | no | `responses`, `chat-completions`, or `messages` |
 | `apiKeyEnv` | no | Environment variable containing API key |
-| `baseUrl` | only for `openai-compatible` | Required for compatible providers and rejected for `openai` and `anthropic`; base URL must end before `/responses`, `/chat/completions`, or `/messages` |
+| `baseUrl` | only for `openai-compatible` | Required for compatible providers and rejected for `openai` and `anthropic`; remote endpoints must use `https`; `http` is allowed only for `localhost`, `127.0.0.1`, or `[::1]`; credentials, query strings, and fragments are rejected; base URL must end before `/responses`, `/chat/completions`, or `/messages` |
 | `apiVersion` | no | Provider API version header, currently used by Anthropic |
 | `timeoutMs` | no | Request timeout, default `30000` |
 | `retries` | no | Retry count after first failed attempt, default `1` |
@@ -164,7 +164,7 @@ tests:
 
 ## Network Audit
 
-Use `aici audit --config aici.yml` to print the exact provider endpoints implied by a config. Use `--json` for CI allowlists.
+Use `aici audit --config aici.yml` to print the exact provider endpoints implied by a config. Use `--json` for CI allowlists. For live checks, pass the same approved endpoints to `aici run --allow-provider-endpoint` so endpoint changes fail before provider API keys are read.
 
 `provider` is the model under test. Aici v0.1 has no `judge` provider; future LLM-as-judge grading must use a separate config boundary and appear separately in audit output.
 

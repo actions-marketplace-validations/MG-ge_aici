@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolveConfigFile } from "./paths.js";
-import { ANTHROPIC_BASE_URL, OPENAI_BASE_URL } from "./provider-endpoints.js";
+import { getProviderRequestUrl } from "./provider-endpoints.js";
 import type { AiciProvider, AiciTest, AiciToolChoice, AiciToolDefinition, ToolCall } from "./types.js";
 
 export type ProviderCall = {
@@ -118,10 +118,10 @@ async function callAnthropicMessages(
     throw new Error(`Missing API key env var ${apiKeyEnv} for test "${test.name}".`);
   }
 
-  const baseUrl = ANTHROPIC_BASE_URL;
   const startedAt = performance.now();
   const tools = await resolveTools(test, rootDir);
-  const response = await fetchWithTimeout(`${baseUrl}/messages`, {
+  const requestUrl = getProviderRequestUrl(provider);
+  const response = await fetchProvider(provider, requestUrl, {
     method: "POST",
     headers: {
       "x-api-key": apiKey,
@@ -180,14 +180,6 @@ async function callOpenAiCompatible(
     throw new Error(`Provider "openai" does not allow baseUrl; use type "openai-compatible" for custom endpoints.`);
   }
 
-  const baseUrl = provider.type === "openai"
-    ? OPENAI_BASE_URL
-    : stripTrailingSlash(provider.baseUrl);
-
-  if (!baseUrl) {
-    throw new Error(`Provider "${provider.type}" requires baseUrl.`);
-  }
-
   const apiKeyEnv = provider.apiKeyEnv ?? "OPENAI_API_KEY";
   const apiKey = process.env[apiKeyEnv];
 
@@ -197,8 +189,8 @@ async function callOpenAiCompatible(
 
   const api = provider.api ?? (provider.type === "openai" ? "responses" : "chat-completions");
   const request = api === "responses"
-    ? () => callResponsesApi(provider, test, prompt, apiKey, baseUrl, rootDir)
-    : () => callChatCompletionsApi(provider, test, prompt, apiKey, baseUrl, rootDir);
+    ? () => callResponsesApi(provider, test, prompt, apiKey, rootDir)
+    : () => callChatCompletionsApi(provider, test, prompt, apiKey, rootDir);
 
   return withRetries(request, provider.retries ?? 1);
 }
@@ -208,12 +200,12 @@ async function callResponsesApi(
   test: AiciTest,
   prompt: string,
   apiKey: string,
-  baseUrl: string,
   rootDir: string,
 ): Promise<ProviderCall> {
   const startedAt = performance.now();
   const tools = await resolveTools(test, rootDir);
-  const response = await fetchWithTimeout(`${baseUrl}/responses`, {
+  const requestUrl = getProviderRequestUrl(provider);
+  const response = await fetchProvider(provider, requestUrl, {
     method: "POST",
     headers: {
       "authorization": `Bearer ${apiKey}`,
@@ -262,12 +254,12 @@ async function callChatCompletionsApi(
   test: AiciTest,
   prompt: string,
   apiKey: string,
-  baseUrl: string,
   rootDir: string,
 ): Promise<ProviderCall> {
   const startedAt = performance.now();
   const tools = await resolveTools(test, rootDir);
-  const response = await fetchWithTimeout(`${baseUrl}/chat/completions`, {
+  const requestUrl = getProviderRequestUrl(provider);
+  const response = await fetchProvider(provider, requestUrl, {
     method: "POST",
     headers: {
       "authorization": `Bearer ${apiKey}`,
@@ -310,6 +302,15 @@ async function callChatCompletionsApi(
     provider: provider.type,
     model: provider.model,
   };
+}
+
+async function fetchProvider(provider: AiciProvider, url: string, init: RequestInit, timeoutMs = 30_000): Promise<Response> {
+  const expectedUrl = getProviderRequestUrl(provider);
+  if (normalizeEndpoint(url) !== normalizeEndpoint(expectedUrl)) {
+    throw new Error(`Provider request URL mismatch: ${url} does not match configured endpoint ${expectedUrl}.`);
+  }
+
+  return fetchWithTimeout(url, init, timeoutMs);
 }
 
 async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs = 30_000): Promise<Response> {
@@ -551,6 +552,6 @@ function estimateCost(model: string, inputTokens?: number, outputTokens?: number
   return (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
 }
 
-function stripTrailingSlash(value: string): string {
-  return value.endsWith("/") ? value.slice(0, -1) : value;
+function normalizeEndpoint(value: string): string {
+  return value.replace(/\/+$/u, "");
 }

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { writeFile } from "node:fs/promises";
 import {
+  assertAllowedProviderEndpoints,
   createAuditReport,
   findDisallowedProviderEndpoints,
   renderAuditReport,
@@ -58,6 +59,11 @@ async function main(): Promise<void> {
 
   if (command === "run") {
     const loaded = await loadConfig(options.config);
+    if (options.allowProviderEndpoint && options.allowProviderEndpoint.length > 0) {
+      const report = await createAuditReport(loaded.config, loaded.configPath);
+      assertAllowedProviderEndpoints(report, options.allowProviderEndpoint);
+    }
+
     const result = await runConfig(loaded.config, loaded.rootDir);
     await writeReports(result, options.reportDir);
     printSummary(result.passed, result.results, options.reportDir ?? ".aici");
@@ -141,7 +147,7 @@ Commands:
   aici validate [--config aici.yml]
   aici audit [--config aici.yml] [--json] [--allow-provider-endpoint URL]
   aici schema
-  aici run [--config aici.yml] [--report-dir .aici]
+  aici run [--config aici.yml] [--report-dir .aici] [--allow-provider-endpoint URL]
 `);
 }
 

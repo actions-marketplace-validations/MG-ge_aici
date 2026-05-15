@@ -10,7 +10,7 @@ export function getProviderRequestUrl(provider: AiciProvider): string {
 
   const baseUrl = provider.type === "openai"
     ? OPENAI_BASE_URL
-    : stripTrailingSlash(provider.baseUrl);
+    : normalizeProviderBaseUrl(provider.baseUrl);
 
   const api = provider.api ?? (provider.type === "openai" ? "responses" : "chat-completions");
   return `${baseUrl}/${api === "responses" ? "responses" : "chat/completions"}`;
@@ -24,6 +24,34 @@ export function getProviderApiKeyEnv(provider: AiciProvider): string {
   return provider.type === "anthropic" ? "ANTHROPIC_API_KEY" : "OPENAI_API_KEY";
 }
 
-function stripTrailingSlash(value: string): string {
-  return value.replace(/\/+$/u, "");
+export function normalizeProviderBaseUrl(value: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(value);
+  } catch {
+    throw new Error(`Provider baseUrl must be an absolute URL.`);
+  }
+
+  if (parsed.username || parsed.password) {
+    throw new Error(`Provider baseUrl must not include credentials.`);
+  }
+
+  if (parsed.search || parsed.hash) {
+    throw new Error(`Provider baseUrl must not include query strings or fragments.`);
+  }
+
+  if (parsed.protocol !== "https:" && !isLocalHttpUrl(parsed)) {
+    throw new Error(`Provider baseUrl must use https, except localhost or loopback http URLs for local models.`);
+  }
+
+  return parsed.toString().replace(/\/+$/u, "");
+}
+
+function isLocalHttpUrl(value: URL): boolean {
+  return value.protocol === "http:" && (
+    value.hostname === "localhost"
+    || value.hostname === "127.0.0.1"
+    || value.hostname === "::1"
+    || value.hostname === "[::1]"
+  );
 }

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import YAML from "yaml";
+import { normalizeProviderBaseUrl } from "./provider-endpoints.js";
 import type { AiciConfig, AiciProvider } from "./types.js";
 
 export type LoadedConfig = {
@@ -132,6 +133,15 @@ function validateProvider(value: unknown, label: string): AiciProvider {
 
   if (value.type === "openai-compatible" && typeof value.baseUrl !== "string") {
     throw new Error(`${label}.baseUrl is required for openai-compatible providers.`);
+  }
+
+  if (value.type === "openai-compatible" && typeof value.baseUrl === "string") {
+    try {
+      normalizeProviderBaseUrl(value.baseUrl);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`${label}.baseUrl is invalid: ${message}`);
+    }
   }
 
   if ((value.type === "openai" || value.type === "anthropic") && value.baseUrl !== undefined) {

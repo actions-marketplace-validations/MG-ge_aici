@@ -38,6 +38,10 @@ inputs:
     description: Space or comma separated provider secret environment variable names guarded during pull_request and pull_request_target events.
     required: false
     default: "OPENAI_API_KEY ANTHROPIC_API_KEY"
+  allowed-provider-endpoints:
+    description: Space or comma separated provider request URLs allowed during live runs. When set, Aici fails before provider secrets are read if the config contains any other endpoint.
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -95,10 +99,17 @@ runs:
         AICI_CONFIG: ${{ inputs.config }}
         AICI_REPORT_DIR: ${{ inputs.report-dir }}
         AICI_COMMENT: ${{ inputs.comment }}
+        AICI_ALLOWED_PROVIDER_ENDPOINTS: ${{ inputs.allowed-provider-endpoints }}
       run: |
         set +e
         mkdir -p -- "$AICI_REPORT_DIR"
-        node dist/cli.js run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR"
+        endpoint_args=()
+        endpoints="$(printf '%s' "$AICI_ALLOWED_PROVIDER_ENDPOINTS" | tr ',' ' ')"
+        for endpoint in $endpoints; do
+          endpoint_args+=(--allow-provider-endpoint "$endpoint")
+        done
+
+        node dist/cli.js run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR" "${endpoint_args[@]}"
         status=$?
         echo "$status" > "$AICI_REPORT_DIR/exit-code"
 

@@ -1,6 +1,6 @@
 {
   "name": "@mgicloud/aici",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Local-first AI quality gates for pull requests.",
   "type": "module",
   "homepage": "https://github.com/MG-ge/aici#readme",
@@ -63,7 +63,8 @@
     "live:anthropic": "tsx src/cli.ts run --config examples/anthropic/aici.yml",
     "live:anthropic-tool": "tsx src/cli.ts run --config examples/anthropic-tool-call/aici.yml",
     "schema": "tsx src/cli.ts schema",
-    "schema:check": "node --input-type=module -e \"import fs from 'node:fs/promises'; import { AICI_CONFIG_SCHEMA } from './dist/schema.js'; const file = JSON.parse(await fs.readFile('schemas/aici.schema.json', 'utf8')); if (JSON.stringify(file) !== JSON.stringify(AICI_CONFIG_SCHEMA)) { console.error('schemas/aici.schema.json is out of sync with src/schema.ts'); process.exit(1); }\""
+    "schema:check": "node --input-type=module -e \"import fs from 'node:fs/promises'; import { AICI_CONFIG_SCHEMA } from './dist/schema.js'; const file = JSON.parse(await fs.readFile('schemas/aici.schema.json', 'utf8')); if (JSON.stringify(file) !== JSON.stringify(AICI_CONFIG_SCHEMA)) { console.error('schemas/aici.schema.json is out of sync with src/schema.ts'); process.exit(1); }\"",
+    "security:audit": "npm audit --audit-level=moderate"
   },
   "dependencies": {
     "ajv": "^8.17.1",

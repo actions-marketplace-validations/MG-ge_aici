@@ -1,6 +1,6 @@
 # GitHub Action
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-05-15
 
 ## Inputs
 
@@ -15,6 +15,7 @@
 | `upload-artifact` | `true` | Upload report directory |
 | `allow-provider-secrets` | `false` | Permit live provider checks with provider API-key env vars during `pull_request` or `pull_request_target` events |
 | `provider-secret-envs` | `OPENAI_API_KEY ANTHROPIC_API_KEY` | Space or comma separated provider secret env var names guarded during pull-request events |
+| `allowed-provider-endpoints` | empty | Space or comma separated provider request URLs allowed during `run`; when set, Aici fails before provider secrets are read if the config contains any other endpoint |
 
 ## Minimal Workflow
 
@@ -95,6 +96,20 @@ Run `aici audit` before live checks if your repository has an approved provider 
       --allow-provider-endpoint https://api.openai.com/v1/responses \
       --allow-provider-endpoint https://api.anthropic.com/v1/messages
 ```
+
+For the composite Action, prefer enforcing the same allowlist on the live run itself:
+
+```yaml
+- uses: ./
+  env:
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  with:
+    config: examples/openai/aici.yml
+    allow-provider-secrets: true
+    allowed-provider-endpoints: https://api.openai.com/v1/responses
+```
+
+With `allowed-provider-endpoints` set, the action invokes `aici run --allow-provider-endpoint ...`. Aici rejects unapproved provider URLs before reading provider API keys or sending provider requests.
 
 Use `--json` for custom policies:
 

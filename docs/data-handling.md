@@ -1,6 +1,6 @@
 # Data Handling
 
-**Last updated:** 2026-05-08
+**Last updated:** 2026-05-15
 
 This page explains what Aici reads, sends, stores, and reports in v0.1.
 
@@ -43,9 +43,10 @@ Aici does not proxy live provider calls through an Aici server in v0.1. To revie
 ```bash
 npx @mgicloud/aici audit --config aici.yml
 npx @mgicloud/aici audit --config aici.yml --json
+npx @mgicloud/aici run --config aici.yml --allow-provider-endpoint https://api.openai.com/v1/responses
 ```
 
-The JSON form is intended for CI endpoint allowlists.
+The JSON form is intended for CI endpoint allowlists. Use `run --allow-provider-endpoint` on live jobs to reject unexpected provider endpoints before provider API keys are read.
 
 ## What Aici Stores
 
@@ -69,6 +70,7 @@ Use these defaults for sensitive workflows:
 - Disable artifact upload if reports may contain private data.
 - Configure `redact` for tenant ids, emails, customer ids, and known sensitive fixture values.
 - Do not run live checks with provider secrets against untrusted PR configs.
+- For trusted live checks, enforce `--allow-provider-endpoint` or the GitHub Action `allowed-provider-endpoints` input.
 
 ## Provider Risk
 

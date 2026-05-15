@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  assertAllowedProviderEndpoints,
   createAuditReport,
   findDisallowedProviderEndpoints,
   renderAuditReport,
@@ -102,4 +103,31 @@ test("audit allowlist detects unapproved provider endpoints", async () => {
   const violations = findDisallowedProviderEndpoints(report, ["https://api.openai.com/v1/responses/"]);
   assert.deepEqual(violations.map((violation) => violation.endpoint), ["https://models.example.test/v1/chat/completions"]);
   assert.match(renderEndpointViolations(violations), /unapproved provider endpoints/u);
+});
+
+test("endpoint allowlist assertion rejects before live runs", async () => {
+  const config: AiciConfig = {
+    version: 1,
+    provider: {
+      type: "openai",
+      model: "gpt-5.4-mini",
+    },
+    tests: [
+      {
+        name: "live",
+        prompt: "Return ok",
+      },
+    ],
+  };
+
+  const report = await createAuditReport(config, "/tmp/aici.yml");
+
+  assert.doesNotThrow(() => {
+    assertAllowedProviderEndpoints(report, ["https://api.openai.com/v1/responses"]);
+  });
+
+  assert.throws(
+    () => assertAllowedProviderEndpoints(report, ["https://api.anthropic.com/v1/messages"]),
+    /unapproved provider endpoints/u,
+  );
 });

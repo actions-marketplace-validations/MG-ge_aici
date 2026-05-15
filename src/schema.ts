@@ -94,7 +94,8 @@ export const AICI_CONFIG_SCHEMA = {
           "type": "string"
         },
         "baseUrl": {
-          "type": "string"
+          "type": "string",
+          "description": "Required for openai-compatible providers. Remote endpoints must use https; http is allowed only for localhost or loopback local-model endpoints. Do not include credentials, query strings, or fragments."
         },
         "apiVersion": {
           "type": "string"
