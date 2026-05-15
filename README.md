@@ -1,9 +1,9 @@
 # Aici
 
-> Catch LLM regressions before deploy.
+> Local-first AI quality gates for pull requests.
 
-**Status:** v0.1.0 launched
-**Last updated:** 2026-05-06
+**Status:** v0.1.2 launched
+**Last updated:** 2026-05-08
 **Owner:** MG
 
 ---
@@ -15,20 +15,21 @@ npx @mgicloud/aici init --config aici.yml
 npx @mgicloud/aici run --config aici.yml
 ```
 
-Use `aici.yml` to test prompt behavior, JSON contracts, tool calls, cost, and latency before a pull request is merged.
+Use `aici.yml` to test prompt behavior, JSON contracts, tool calls, cost, and latency before a pull request is merged. Aici has no telemetry and no Aici-hosted backend; live checks call only the provider endpoint you configure.
 
 ---
 
 ## Who It Is For
 
-Aici is for developers who already ship LLM features and need a small release gate before deploy.
+Aici is for developers who already ship LLM features and need a small, reviewable release gate before deploy.
 
 Good fits:
 
 - JSON or structured-output workflows that break downstream code when shape changes.
 - Tool/function-calling agents where the model must call the right tool with valid arguments.
 - Support, extraction, classification, and API-wrapper prompts that need regression tests.
-- Teams that want GitHub Actions evidence without adopting a full tracing or governance platform.
+- Teams that want GitHub Actions evidence without adopting a full tracing, hosted eval, or governance platform.
+- Security-conscious repos that need to see exactly which provider endpoints an AI test can call.
 
 Not a good fit yet:
 
@@ -41,11 +42,11 @@ Not a good fit yet:
 
 ## Strategic Frame
 
-Aici is a no-calls, self-serve developer tool. It should be bought and adopted like a CI utility, not sold like an enterprise governance platform.
+Aici is a no-phone-home, self-serve developer tool. It should be bought and adopted like a CI utility, not sold like an enterprise governance platform.
 
 The product promise:
 
-> Catch LLM regressions before deploy.
+> Before a PR merges, prove your AI output still matches the contract without sending eval data to an eval vendor.
 
 The first product surface is:
 
@@ -53,7 +54,8 @@ The first product surface is:
 - GitHub Action
 - YAML test cases
 - Markdown/HTML reports
-- optional hosted history later
+- audit output for provider endpoints, dependencies, and network policy
+- optional hosted history later, only if users ask for it
 
 This is one product, not five separate tools. Structured output tests, cost guards, eval templates, and synthetic edge cases are features inside the same release-gate workflow.
 
@@ -92,6 +94,16 @@ npm run dev -- run --config examples/basic/aici.yml
 ```
 
 The sample writes reports to `.aici/aici-report.md`, `.aici/aici-report.json`, and `.aici/aici-report.html`.
+
+Network audit:
+
+```bash
+npm run dev -- audit --config aici.yml
+npm run dev -- audit --config aici.yml --json
+npm run dev -- audit --config examples/openai/aici.yml --allow-provider-endpoint https://api.openai.com/v1/responses
+```
+
+The audit prints configured provider endpoints, runtime dependencies, source summary, and the network policy. Fixture-only configs show no provider endpoints.
 
 Failure-path sample:
 
@@ -191,6 +203,7 @@ jobs:
 | [Examples Guide](./docs/examples.md) | Which example or template to start from |
 | [GitHub Action](./docs/github-action.md) | Action inputs, PR comments, and workflow setup |
 | [Data Handling](./docs/data-handling.md) | What leaves your machine and what is stored |
+| [Network Audit](./docs/network-audit.md) | `aici audit`, endpoint allowlists, and provider/judge boundaries |
 | [Security](./docs/security.md) | Redaction, secrets, and CI artifact guidance |
 | [Release Checklist](./docs/release-checklist.md) | Checks before publishing v1 |
 

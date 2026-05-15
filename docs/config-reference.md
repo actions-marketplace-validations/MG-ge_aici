@@ -1,6 +1,6 @@
 # Config Reference
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-08
 
 ---
 
@@ -159,6 +159,14 @@ tests:
 | `retries` | no | Retry count after first failed attempt, default `1` |
 | `temperature` | no | Generation temperature, default `0` |
 | `maxOutputTokens` | no | Output token cap |
+
+---
+
+## Network Audit
+
+Use `aici audit --config aici.yml` to print the exact provider endpoints implied by a config. Use `--json` for CI allowlists.
+
+`provider` is the model under test. Aici v0.1 has no `judge` provider; future LLM-as-judge grading must use a separate config boundary and appear separately in audit output.
 
 ---
 

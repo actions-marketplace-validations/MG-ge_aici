@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { resolveConfigFile } from "./paths.js";
+import { ANTHROPIC_BASE_URL, OPENAI_BASE_URL } from "./provider-endpoints.js";
 import type { AiciProvider, AiciTest, AiciToolChoice, AiciToolDefinition, ToolCall } from "./types.js";
 
 export type ProviderCall = {
@@ -82,9 +83,6 @@ const MODEL_PRICING_USD_PER_1M_TOKENS: Record<string, { input: number; output: n
   "claude-opus-4-6": { input: 5, output: 25 },
   "claude-opus-4-7": { input: 5, output: 25 },
 };
-
-const OPENAI_BASE_URL = "https://api.openai.com/v1";
-const ANTHROPIC_BASE_URL = "https://api.anthropic.com/v1";
 
 export async function callProvider(
   provider: AiciProvider,

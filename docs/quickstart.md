@@ -1,6 +1,6 @@
 # Quickstart
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-08
 
 ## 1. Install
 
@@ -50,7 +50,16 @@ The live OpenAI commands expect `OPENAI_API_KEY` in the environment.
 
 Use live checks for high-value prompts only. Keep most regression coverage fixture-based to avoid flaky CI and avoid unnecessary model spend.
 
-## 5. Add GitHub Actions
+## 5. Audit Network Behavior
+
+```bash
+npx @mgicloud/aici audit --config aici.yml
+npx @mgicloud/aici audit --config aici.yml --json
+```
+
+Fixture-only configs show no provider endpoints. Live provider configs show the exact OpenAI, Anthropic, or OpenAI-compatible endpoint Aici may call. Aici has no telemetry and no remote Aici backend.
+
+## 6. Add GitHub Actions
 
 ```yaml
 name: Aici

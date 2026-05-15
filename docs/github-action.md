@@ -1,6 +1,6 @@
 # GitHub Action
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-08
 
 ## Inputs
 
@@ -82,4 +82,33 @@ For custom `apiKeyEnv` names, extend the guard list:
   with:
     config: aici.yml
     provider-secret-envs: OPENAI_API_KEY ANTHROPIC_API_KEY AICI_PROVIDER_KEY
+```
+
+## Endpoint Audit In CI
+
+Run `aici audit` before live checks if your repository has an approved provider endpoint list:
+
+```yaml
+- run: |
+    npx @mgicloud/aici audit \
+      --config aici.yml \
+      --allow-provider-endpoint https://api.openai.com/v1/responses \
+      --allow-provider-endpoint https://api.anthropic.com/v1/messages
+```
+
+Use `--json` for custom policies:
+
+```yaml
+- run: npx @mgicloud/aici audit --config aici.yml --json > aici-audit.json
+- run: |
+    node -e "
+    const audit = require('./aici-audit.json');
+    const allowed = new Set(['https://api.openai.com/v1/responses']);
+    for (const endpoint of audit.providerEndpoints) {
+      if (!allowed.has(endpoint.endpoint)) {
+        console.error('Unapproved provider endpoint:', endpoint.endpoint);
+        process.exit(1);
+      }
+    }
+    "
 ```

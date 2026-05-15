@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2 - 2026-05-15
+
+- Added `aici audit` with human and JSON output for provider endpoints, empty judge endpoints, runtime dependencies, source summary, and network policy.
+- Added `--allow-provider-endpoint` so CI can fail on unapproved provider endpoints.
+- Documented the provider/judge network boundary and the limits of static audit versus runner-level egress controls.
+- Repositioned docs and the landing page around local-first, no-phone-home AI quality gates for pull requests.
+- Added a real proof GIF built from local CLI, GitHub Action, and HTML report screenshots.
+- Added public validation targets and outreach prompts for user discovery.
+
 ## 0.1.1 - 2026-05-06
 
 - Hardened provider config so official OpenAI and Anthropic providers always use official endpoints and reject `baseUrl`.

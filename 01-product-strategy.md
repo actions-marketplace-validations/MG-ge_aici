@@ -1,6 +1,6 @@
 # Product Strategy
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-08
 
 ---
 
@@ -10,15 +10,15 @@ The best solo-founder version is not an AI observability platform, governance su
 
 It is:
 
-> **A small, sharp CI tool for LLM regressions.**
+> **A local-first, no-phone-home AI quality gate for pull requests.**
 
-Developers already understand CI. They do not need to be educated on why tests should fail a release. The product should plug into that mental model.
+Developers already understand CI. Security-minded teams also understand endpoint allowlists, dependency review, and small tools they can audit. The product should plug into both mental models.
 
 ---
 
 ## Category
 
-**Primary category:** LLM CI / AI regression testing  
+**Primary category:** local-first AI quality gates  
 **Secondary category:** lightweight eval runner  
 **Avoided category:** enterprise AI observability/governance platform
 
@@ -34,13 +34,13 @@ The market already has broad platforms:
 
 The opening is narrower:
 
-> Developers who want AI tests in CI without adopting a full observability platform.
+> Developers who want PR-time AI contract checks without sending eval data to an eval vendor.
 
 ---
 
 ## Initial Buyer
 
-**Primary buyer:** solo developers, founding engineers, and small teams shipping LLM features.
+**Primary buyer:** founding engineers, security-conscious AI teams, and small teams shipping LLM features through pull requests.
 
 They have:
 
@@ -49,6 +49,7 @@ They have:
 - occasional model/prompt regressions
 - concern about cost spikes
 - no ML platform team
+- discomfort with hidden telemetry, hosted eval state, or unreviewable provider traffic
 
 They do not want:
 
@@ -56,6 +57,7 @@ They do not want:
 - enterprise onboarding
 - complex dashboards
 - proxy-based tracing as a prerequisite
+- a broad eval platform for a few contract checks
 
 ---
 
@@ -69,15 +71,16 @@ Aici
 ├── structured output checks
 ├── cost budgets
 ├── latency budgets
+├── endpoint audit
 ├── template packs
-└── synthetic edge-case generation
+└── optional synthetic edge-case generation later
 ```
 
 The product promise is not "observe every AI call."
 
 The product promise is:
 
-> Fail the PR when an LLM workflow regresses.
+> Before a PR merges, prove your AI output still matches the contract without sending eval data to an eval vendor.
 
 Brand model:
 
@@ -117,8 +120,10 @@ Compete on:
 - deterministic pass/fail output
 - excellent Markdown PR reports
 - first-class JSON/schema/tool-call checks
-- no dashboard required
-- no tracing proxy required
+- no telemetry
+- no Aici-hosted backend
+- audit output for provider endpoints and dependencies
+- safe defaults for untrusted pull requests
 - no sales call required
 
 ---
@@ -133,6 +138,8 @@ Compete on:
 - agent orchestration
 - hosted proxy/gateway
 - complex RAG evaluation platform
+- paid hosted history before repeated user pull
+- Python/Rust/Go rewrite before validation
 
 Those areas are crowded and heavier than the no-calls strategy can support early.
 
@@ -149,3 +156,15 @@ Early vanity metrics do not matter. The important signals are:
 - PR comments generated
 - users adding more test cases after first run
 - inbound requests for hosted history or team features
+
+## Current Strategic Decision
+
+Do not chase Promptfoo feature parity. Promptfoo already owns the broad "LLM eval CLI/platform" lane and now has OpenAI distribution. Aici should stay narrower:
+
+- PR-native
+- local-first
+- no-phone-home
+- auditable endpoint behavior
+- deterministic contract checks before broad LLM-as-judge metrics
+
+The next paid product, if any, should be hosted history for teams that already use the free release gate. Do not build it until users ask for shared run history after adopting the CLI.

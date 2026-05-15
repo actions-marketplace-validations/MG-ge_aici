@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 import { writeFile } from "node:fs/promises";
+import {
+  createAuditReport,
+  findDisallowedProviderEndpoints,
+  renderAuditReport,
+  renderEndpointViolations,
+} from "./audit.js";
 import { loadConfig } from "./config.js";
 import { writeReports } from "./report.js";
 import { runConfig } from "./runner.js";
@@ -10,6 +16,8 @@ type CliOptions = {
   config?: string;
   reportDir?: string;
   force?: boolean;
+  json?: boolean;
+  allowProviderEndpoint?: string[];
 };
 
 async function main(): Promise<void> {
@@ -24,6 +32,22 @@ async function main(): Promise<void> {
   if (command === "validate") {
     const loaded = await loadConfig(options.config);
     console.log(`Valid config: ${loaded.configPath}`);
+    return;
+  }
+
+  if (command === "audit") {
+    const loaded = await loadConfig(options.config);
+    const report = await createAuditReport(loaded.config, loaded.configPath);
+    console.log(options.json ? JSON.stringify(report, null, 2) : renderAuditReport(report));
+
+    if (options.allowProviderEndpoint && options.allowProviderEndpoint.length > 0) {
+      const violations = findDisallowedProviderEndpoints(report, options.allowProviderEndpoint);
+      if (violations.length > 0) {
+        console.error(renderEndpointViolations(violations));
+        process.exitCode = 1;
+      }
+    }
+
     return;
   }
 
@@ -60,6 +84,12 @@ function parseOptions(args: string[]): CliOptions {
       index += 1;
     } else if (arg === "--force") {
       options.force = true;
+    } else if (arg === "--json") {
+      options.json = true;
+    } else if (arg === "--allow-provider-endpoint" && next) {
+      options.allowProviderEndpoint ??= [];
+      options.allowProviderEndpoint.push(next);
+      index += 1;
     }
   }
 
@@ -109,6 +139,7 @@ function printHelp(): void {
 Commands:
   aici init [--config aici.yml] [--force]
   aici validate [--config aici.yml]
+  aici audit [--config aici.yml] [--json] [--allow-provider-endpoint URL]
   aici schema
   aici run [--config aici.yml] [--report-dir .aici]
 `);

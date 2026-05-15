@@ -1,12 +1,12 @@
 # Security
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-08
 
 ## V1 Security Model
 
-Aici is designed as a local/CI-first tool. It does not require hosted storage, hosted prompt logs, or a backend service in v1.
+Aici is designed as a local/CI-first, no-phone-home tool. It does not require hosted storage, hosted prompt logs, telemetry, or a backend service in v1.
 
-For a concise data-flow explanation, see [Data Handling](./data-handling.md).
+For a concise data-flow explanation, see [Data Handling](./data-handling.md). For machine-readable endpoint review, see [Network Audit](./network-audit.md).
 
 ## Secrets
 
@@ -33,6 +33,7 @@ Config-referenced files are constrained to the config directory. Keep prompts, f
 Recommended defaults:
 
 - Use fixture outputs for broad regression coverage.
+- Run `aici audit --json` before enabling live provider checks in CI.
 - Use live provider calls only for smoke tests and critical prompts.
 - Keep provider keys in GitHub Actions secrets.
 - Do not run live checks with provider secrets against untrusted PR configs, prompts, schemas, or tool definitions. The GitHub Action defaults to blocking guarded provider secret env vars during pull-request events unless `allow-provider-secrets: true` is set.
@@ -50,6 +51,16 @@ This repository includes GitHub workflows for:
 
 The static Cloudflare Pages site includes `site/_headers` for HTTPS, content-type, frame, permissions, referrer, and CSP headers.
 
+## Network Audit
+
+`aici audit` prints configured provider endpoints, currently empty judge endpoints, runtime dependencies, source summary, and network policy flags. The CLI reports:
+
+- `telemetry: false`
+- `aiciBackend: false`
+- no judge endpoint in v0.1
+
+Use `aici audit --json` for CI allowlists instead of grepping human output.
+
 ## Threats Aici Tries To Reduce
 
 - Silent prompt regressions that bypass normal unit tests.
@@ -61,6 +72,7 @@ The static Cloudflare Pages site includes `site/_headers` for HTTPS, content-typ
 ## Threats You Still Own
 
 - Prompt or output data sent to model providers in live checks.
+- Future LLM-as-judge calls if a later version adds them; they must be treated as a separate network boundary.
 - CI artifact visibility and retention.
 - GitHub Actions secret permissions.
 - Sensitive test fixtures committed to the repository.
@@ -82,3 +94,4 @@ The static Cloudflare Pages site includes `site/_headers` for HTTPS, content-typ
 - No production secrets manager.
 - No compliance certification claim.
 - No guarantee that provider-side error bodies omit all sensitive data before local redaction.
+- `aici audit` is a static config/package audit, not a process-level network sandbox. Use CI runner egress controls for strict network enforcement.

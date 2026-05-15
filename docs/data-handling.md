@@ -1,12 +1,12 @@
 # Data Handling
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-08
 
 This page explains what Aici reads, sends, stores, and reports in v0.1.
 
 ## Short Version
 
-Aici is local/CI-first. It does not require an Aici-hosted backend and does not store prompts on an Aici service.
+Aici is local/CI-first. It has no telemetry, no Aici-hosted backend, and does not store prompts on an Aici service.
 
 When you run fixture tests, Aici reads local files and writes local reports.
 
@@ -38,7 +38,14 @@ Live provider tests:
 - Tool names, descriptions, and JSON Schemas are sent when tools are configured.
 - Provider API keys are sent only to the selected provider endpoint. `type: openai` and `type: anthropic` use the official provider endpoints; custom endpoints require `type: openai-compatible`.
 
-Aici does not proxy live provider calls through an Aici server in v0.1.
+Aici does not proxy live provider calls through an Aici server in v0.1. To review the exact endpoints a config may call, run:
+
+```bash
+npx @mgicloud/aici audit --config aici.yml
+npx @mgicloud/aici audit --config aici.yml --json
+```
+
+The JSON form is intended for CI endpoint allowlists.
 
 ## What Aici Stores
 
@@ -66,6 +73,10 @@ Use these defaults for sensitive workflows:
 ## Provider Risk
 
 Provider retention and training policies are controlled by the model provider, not by Aici. Before sending production prompts or customer data to a live provider check, review that provider's current terms and data controls.
+
+## Judge Boundary
+
+Aici v0.1 does not use LLM-as-judge grading. If a future version adds judge models, those calls must be configured separately from `provider` and shown separately in `aici audit` under `judgeEndpoints`.
 
 ## Recommended Rollout
 
