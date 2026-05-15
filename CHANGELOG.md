@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Added Docker strict-mode guidance and a fixture image for running deterministic Aici checks with `--network none`.
+
 ## 0.1.5 - 2026-05-15
 
 - Replaced inline PR-comment shell logic with a tested Node upsert script, removing the `jq` dependency and covering create/update sticky-comment behavior.

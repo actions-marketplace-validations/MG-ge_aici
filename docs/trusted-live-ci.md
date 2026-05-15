@@ -81,6 +81,8 @@ This job fails before provider API keys are read if the config points at an endp
 
 Aici enforces endpoint allowlists for its own provider calls. It is not a process-level network sandbox for every command in the CI job.
 
+For fixture-only pull-request checks, use Docker `--network none` to run Aici with no outbound network path. See [Docker Strict Mode](./docker-strict-mode.md).
+
 For strict egress enforcement:
 
 - Put live checks in a dedicated job with no unrelated commands after secrets are exposed.

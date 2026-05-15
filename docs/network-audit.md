@@ -88,4 +88,8 @@ In v0.1, Aici has no judge provider. All checks are deterministic local checks o
 
 ## Limits
 
-Aici's provider client enforces that each provider request URL matches the endpoint printed by `aici audit`. `aici run --allow-provider-endpoint` adds a policy gate before provider API keys are read. These controls apply to Aici's own provider calls; they are not a process-level network sandbox and do not intercept arbitrary traffic from other commands running in the same CI job. For high-security CI, combine them with runner-level egress controls, dependency review, pinned versions, and a provider-secret workflow that only runs after config changes are trusted.
+Aici's provider client enforces that each provider request URL matches the endpoint printed by `aici audit`. `aici run --allow-provider-endpoint` adds a policy gate before provider API keys are read. These controls apply to Aici's own provider calls; they are not a process-level network sandbox and do not intercept arbitrary traffic from other commands running in the same CI job.
+
+For fixture-only checks, Docker `--network none` provides a real no-network process boundary. See [Docker Strict Mode](./docker-strict-mode.md).
+
+For high-security live CI, combine endpoint allowlists with runner-level egress controls, dependency review, pinned versions, and a provider-secret workflow that only runs after config changes are trusted.

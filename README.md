@@ -112,6 +112,8 @@ npx @mgicloud/aici run --config examples/openai/aici.yml \
 
 Aici enforces provider endpoint allowlists for its own live provider calls. It is not a process-level network sandbox for unrelated commands in the same CI job.
 
+For fixture-only PR gates, you can run Aici inside Docker with `--network none` so the container has no outbound network path.
+
 ## Live Providers
 
 OpenAI:
@@ -148,6 +150,7 @@ Reports may include model outputs and normalized tool-call arguments. Use `redac
 | [Recipes](./docs/recipes.md) | Copy-paste support, extraction, tool-agent, live, and local-model setups |
 | [GitHub Action](./docs/github-action.md) | Action inputs, PR comments, artifacts, and trusted live checks |
 | [Trusted Live CI](./docs/trusted-live-ci.md) | Safe workflow split for provider secrets and endpoint allowlists |
+| [Docker Strict Mode](./docs/docker-strict-mode.md) | Run fixture checks in a no-network container |
 | [Data Handling](./docs/data-handling.md) | What leaves your machine and what is stored |
 | [Network Audit](./docs/network-audit.md) | Endpoint audit, allowlists, and provider/judge boundaries |
 | [Security](./docs/security.md) | Redaction, secrets, artifacts, and CI guidance |
