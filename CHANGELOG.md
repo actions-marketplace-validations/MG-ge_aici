@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.6 - 2026-05-15
 
 - Added Docker strict-mode guidance and a fixture image for running deterministic Aici checks with `--network none`.
 

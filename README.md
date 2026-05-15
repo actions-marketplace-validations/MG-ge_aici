@@ -2,7 +2,7 @@
 
 > Local-first AI quality gates for pull requests.
 
-**Status:** v0.1.5
+**Status:** v0.1.6
 **Last updated:** 2026-05-15
 **License:** MIT
 
@@ -70,7 +70,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: MG-ge/aici@v0.1.5
+      - uses: MG-ge/aici@v0.1.6
         with:
           config: aici.yml
           pr-comment: true
@@ -81,7 +81,7 @@ Run live provider checks with secrets only from trusted branches, protected merg
 For trusted live jobs, enforce endpoint allowlists:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

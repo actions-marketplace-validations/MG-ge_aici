@@ -49,7 +49,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: MG-ge/aici@v0.1.5
+      - uses: MG-ge/aici@v0.1.6
         with:
           config: aici.yml
           pr-comment: true
@@ -89,7 +89,7 @@ Do not run live checks with provider secrets against untrusted PR configs, promp
 For trusted live jobs:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

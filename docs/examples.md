@@ -58,7 +58,7 @@ tests:
 Then wire it into GitHub Actions:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   with:
     config: aici.yml
 ```

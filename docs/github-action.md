@@ -34,7 +34,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: MG-ge/aici@v0.1.5
+      - uses: MG-ge/aici@v0.1.6
         with:
           config: aici.yml
 ```
@@ -49,7 +49,7 @@ permissions:
 ```
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   with:
     config: aici.yml
     pr-comment: true
@@ -68,7 +68,7 @@ For a copy-paste two-workflow setup, see [Trusted Live CI](./trusted-live-ci.md)
 The Action blocks pull-request runs when guarded provider secret env vars are present unless `allow-provider-secrets: true` is set. Use that opt-in only after reviewing the config and every referenced prompt, schema, input, fixture, and tool definition.
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
@@ -79,7 +79,7 @@ The Action blocks pull-request runs when guarded provider secret env vars are pr
 For custom `apiKeyEnv` names, extend the guard list:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   env:
     AICI_PROVIDER_KEY: ${{ secrets.AICI_PROVIDER_KEY }}
   with:
@@ -102,7 +102,7 @@ Run `aici audit` before live checks if your repository has an approved provider 
 For the composite Action, prefer enforcing the same allowlist on the live run itself:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

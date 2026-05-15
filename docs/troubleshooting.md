@@ -85,7 +85,7 @@ For public repositories and forked PRs, keep the PR workflow fixture-only. Run l
 For trusted live checks:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.5
+- uses: MG-ge/aici@v0.1.6
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
