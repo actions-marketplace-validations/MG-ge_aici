@@ -854,9 +854,9 @@
       <nav class="nav" aria-label="Primary">
         <a href="#how" class="hide-sm">how it works</a>
         <a href="#proof" class="hide-sm">proof</a>
-        <a href="#fit" class="hide-sm">is it for you?</a>
+        <a href="#fixtures" class="hide-sm">fixtures first</a>
         <a href="#trust" class="hide-sm">safety</a>
-        <a href="#packaging">pricing</a>
+        <a href="#packaging">free</a>
         <a href="https://github.com/MG-ge/aici" class="primary-link">github</a>
       </nav>
     </div>
@@ -865,9 +865,9 @@
   <main id="top">
     <section class="hero">
       <div class="wrap">
-        <div class="kicker"><span class="pip" aria-hidden="true"></span>v0.1.4 - open source - MIT</div>
-        <h1>Local-first AI quality gates for <em>pull requests.</em></h1>
-        <p class="lede">Aici is a no-phone-home CLI and GitHub Action for prompt, JSON, tool-call, latency, and cost contracts. No telemetry. No Aici backend. Live checks call only the provider endpoint your config declares.</p>
+        <div class="kicker"><span class="pip" aria-hidden="true"></span>v0.1.5 - open source - MIT</div>
+        <h1>Small enough to audit. <em>Strict enough to block a merge.</em></h1>
+        <p class="lede">Aici is a local-first CLI and GitHub Action for prompt, JSON, tool-call, latency, and cost contracts in pull requests. No telemetry. No Aici backend. Live checks call only the provider endpoint your config declares.</p>
 
         <div class="install" aria-label="Install command">
           <div class="cmd">
@@ -933,8 +933,8 @@
     <section id="how">
       <div class="wrap">
         <div class="eyebrow">how it works</div>
-        <h2>Edit one line. Watch the PR turn red.</h2>
-        <p class="section-lede">Aici is just a YAML file and a CLI. Try a change below to see the same workflow you would run in <span class="inline-code">.github/workflows/aici.yml</span>, but live on this page.</p>
+        <h2>One YAML file. One failing check. One blocked merge.</h2>
+        <p class="section-lede">Aici turns AI behavior into ordinary CI evidence. Try a change below to see the same workflow you would run in <span class="inline-code">.github/workflows/aici.yml</span>, but live on this page.</p>
 
         <div class="diff">
           <div class="pane">
@@ -1000,31 +1000,31 @@
       </div>
     </section>
 
-    <section id="fit">
+    <section id="fixtures">
       <div class="wrap">
-        <div class="eyebrow">is this for you?</div>
-        <h2>Aici is for one specific person. Probably you. Maybe not.</h2>
-        <p class="section-lede">Better to know fit before you install. Aici is intentionally a release gate, not a general AI platform.</p>
+        <div class="eyebrow">why fixtures first</div>
+        <h2>Start deterministic. Add live checks only where they matter.</h2>
+        <p class="section-lede">Fixture tests catch contract regressions without provider spend, latency, or model flakiness. Live calls are best reserved for the few prompts where real model behavior is the thing under test.</p>
 
         <div class="fit">
           <article class="fit-col yes">
-            <h3>You will feel at home if <span class="tag">yes</span></h3>
+            <h3>Good first gates <span class="tag">fixture</span></h3>
             <ul>
-              <li><span class="mk">+</span><span>You ship LLM features in a real repo, on real branches, through pull requests.</span></li>
-              <li><span class="mk">+</span><span>You have watched a prompt edit silently break a JSON field downstream.</span></li>
-              <li><span class="mk">+</span><span>You already trust CI to gate your code. AI behavior should clear the same bar.</span></li>
-              <li><span class="mk">+</span><span>You want a YAML file in your repo, not another dashboard tab.</span></li>
-              <li><span class="mk">+</span><span>Your team is small enough that platform migration is a real cost.</span></li>
+              <li><span class="mk">+</span><span>Structured output must keep a stable JSON shape.</span></li>
+              <li><span class="mk">+</span><span>An agent must call a specific tool with valid arguments.</span></li>
+              <li><span class="mk">+</span><span>A saved bad output should fail every time in CI.</span></li>
+              <li><span class="mk">+</span><span>Reviewers need a small artifact they can inspect in the PR.</span></li>
+              <li><span class="mk">+</span><span>The check should work without provider keys on forked PRs.</span></li>
             </ul>
           </article>
           <article class="fit-col no">
-            <h3>Look elsewhere if <span class="tag">no</span></h3>
+            <h3>Use live checks for <span class="tag">provider</span></h3>
             <ul>
-              <li><span class="mk">-</span><span>You need full production tracing of every LLM call. Use a tracing platform.</span></li>
-              <li><span class="mk">-</span><span>You want non-engineers to label outputs in annotation queues.</span></li>
-              <li><span class="mk">-</span><span>You want hosted prompt management with versioning and rollout controls.</span></li>
-              <li><span class="mk">-</span><span>You need enterprise governance, SSO, audit logs, or compliance claims in v1.</span></li>
-              <li><span class="mk">-</span><span>You do not write tests for normal code. Aici will not fix that culture.</span></li>
+              <li><span class="mk">-</span><span>Smoke-testing a critical prompt against the real model.</span></li>
+              <li><span class="mk">-</span><span>Checking latency and known token cost budgets.</span></li>
+              <li><span class="mk">-</span><span>Verifying provider-specific tool-call serialization.</span></li>
+              <li><span class="mk">-</span><span>Running a trusted branch or maintainer-approved workflow.</span></li>
+              <li><span class="mk">-</span><span>Auditing exactly which provider endpoint receives the request.</span></li>
             </ul>
           </article>
         </div>
@@ -1033,9 +1033,9 @@
 
     <section id="trust">
       <div class="wrap">
-        <div class="eyebrow">what we do not do</div>
-        <h2>The trust claim is inspectable.</h2>
-        <p class="section-lede">Most AI quality tools want to sit between you and your model. Aici sits next to your test runner and can print the endpoints, dependencies, and source surface it relies on.</p>
+        <div class="eyebrow">trust boundary</div>
+        <h2>No hidden service in the middle.</h2>
+        <p class="section-lede">Aici sits next to your test runner, not between you and your model. It can print the provider endpoints, dependencies, and source surface it relies on before live checks run.</p>
 
         <div class="trust">
           <article class="trust-cell">
@@ -1159,7 +1159,7 @@
         <a href="https://github.com/MG-ge/aici/blob/main/CHANGELOG.md">changelog</a>
         <a href="https://github.com/MG-ge/aici/blob/main/SECURITY.md">security</a>
       </div>
-      <div>aici - v0.1.4 - MIT - local-first AI quality gates</div>
+      <div>aici - v0.1.5 - MIT - local-first AI quality gates</div>
     </div>
   </footer>
 

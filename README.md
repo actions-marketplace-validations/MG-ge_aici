@@ -2,7 +2,7 @@
 
 > Local-first AI quality gates for pull requests.
 
-**Status:** v0.1.4
+**Status:** v0.1.5
 **Last updated:** 2026-05-15
 **License:** MIT
 
@@ -70,7 +70,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: MG-ge/aici@v0.1.4
+      - uses: MG-ge/aici@v0.1.5
         with:
           config: aici.yml
           pr-comment: true
@@ -81,7 +81,7 @@ Run live provider checks with secrets only from trusted branches, protected merg
 For trusted live jobs, enforce endpoint allowlists:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.4
+- uses: MG-ge/aici@v0.1.5
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
@@ -145,7 +145,9 @@ Reports may include model outputs and normalized tool-call arguments. Use `redac
 | [Quickstart](./docs/quickstart.md) | Install, first test, and GitHub Actions setup |
 | [Config Reference](./docs/config-reference.md) | `aici.yml` fields, providers, and checks |
 | [Examples Guide](./docs/examples.md) | Which example or template to start from |
+| [Recipes](./docs/recipes.md) | Copy-paste support, extraction, tool-agent, live, and local-model setups |
 | [GitHub Action](./docs/github-action.md) | Action inputs, PR comments, artifacts, and trusted live checks |
+| [Trusted Live CI](./docs/trusted-live-ci.md) | Safe workflow split for provider secrets and endpoint allowlists |
 | [Data Handling](./docs/data-handling.md) | What leaves your machine and what is stored |
 | [Network Audit](./docs/network-audit.md) | Endpoint audit, allowlists, and provider/judge boundaries |
 | [Security](./docs/security.md) | Redaction, secrets, artifacts, and CI guidance |

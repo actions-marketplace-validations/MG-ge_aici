@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.5 - 2026-05-15
+
+- Replaced inline PR-comment shell logic with a tested Node upsert script, removing the `jq` dependency and covering create/update sticky-comment behavior.
+- Added trusted live CI documentation with separate fixture-only PR and provider-secret workflows.
+- Added copy-paste recipes for support JSON contracts, extraction, tool-calling agents, live provider smoke tests, and local-model checks.
+- Added clearer fixture-first guidance across quickstart, examples, and the landing page.
+- Sharpened landing page positioning around a small, auditable merge gate rather than a broad eval platform.
+
 ## 0.1.4 - 2026-05-15
 
 - Made `aici init` create a self-contained starter fixture, schema, and config that pass immediately outside this repository.

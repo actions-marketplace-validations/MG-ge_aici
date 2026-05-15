@@ -4,6 +4,8 @@
 
 Use this guide to choose the smallest useful Aici setup for your LLM workflow.
 
+For copy-paste production shapes, see [Recipes](./recipes.md).
+
 ## Start Here
 
 Run the deterministic basic example:
@@ -56,7 +58,7 @@ tests:
 Then wire it into GitHub Actions:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.4
+- uses: MG-ge/aici@v0.1.5
   with:
     config: aici.yml
 ```

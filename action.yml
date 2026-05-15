@@ -140,42 +140,14 @@ runs:
 
     - name: Update pull request comment
       if: ${{ always() && inputs.pr-comment == 'true' && github.event_name == 'pull_request' }}
-      shell: bash
       env:
         GH_TOKEN: ${{ github.token }}
+        AICI_ACTION_PATH: ${{ github.action_path }}
         AICI_REPORT_DIR: ${{ inputs.report-dir }}
         AICI_REPOSITORY: ${{ github.repository }}
         AICI_PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
-      run: |
-        marker="<!-- aici-report -->"
-        report_file="$AICI_REPORT_DIR/aici-report.md"
-
-        if [ ! -f "$report_file" ]; then
-          echo "Report not found; skipping PR comment."
-          exit 0
-        fi
-
-        body_file="$(mktemp)"
-        {
-          echo "$marker"
-          echo
-          cat -- "$report_file"
-        } > "$body_file"
-
-        comments="$(gh api "repos/$AICI_REPOSITORY/issues/$AICI_PULL_REQUEST_NUMBER/comments" --paginate)"
-        comment_id="$(echo "$comments" | jq -r ".[] | select(.user.type == \"Bot\" and (.body | contains(\"$marker\"))) | .id" | head -n 1)"
-
-        if [ -n "$comment_id" ] && [ "$comment_id" != "null" ]; then
-          gh api \
-            --method PATCH \
-            "repos/$AICI_REPOSITORY/issues/comments/$comment_id" \
-            --field body="$(cat "$body_file")" >/dev/null
-        else
-          gh api \
-            --method POST \
-            "repos/$AICI_REPOSITORY/issues/$AICI_PULL_REQUEST_NUMBER/comments" \
-            --field body="$(cat "$body_file")" >/dev/null
-        fi
+      shell: bash
+      run: node "$AICI_ACTION_PATH/scripts/upsert-pr-comment.mjs"
 
     - name: Fail workflow on AI regression
       if: ${{ always() }}

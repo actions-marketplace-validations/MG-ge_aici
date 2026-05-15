@@ -34,7 +34,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: MG-ge/aici@v0.1.4
+      - uses: MG-ge/aici@v0.1.5
         with:
           config: aici.yml
 ```
@@ -49,7 +49,7 @@ permissions:
 ```
 
 ```yaml
-- uses: MG-ge/aici@v0.1.4
+- uses: MG-ge/aici@v0.1.5
   with:
     config: aici.yml
     pr-comment: true
@@ -63,10 +63,12 @@ Run live provider checks with API-key secrets only for trusted configs. Do not e
 
 For public repositories and forked PRs, keep the PR workflow fixture-only. Run live provider smoke tests on trusted branches, protected merge queues, scheduled jobs, or a separate maintainer-approved workflow after reviewing the config changes.
 
+For a copy-paste two-workflow setup, see [Trusted Live CI](./trusted-live-ci.md).
+
 The Action blocks pull-request runs when guarded provider secret env vars are present unless `allow-provider-secrets: true` is set. Use that opt-in only after reviewing the config and every referenced prompt, schema, input, fixture, and tool definition.
 
 ```yaml
-- uses: MG-ge/aici@v0.1.4
+- uses: MG-ge/aici@v0.1.5
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
@@ -77,7 +79,7 @@ The Action blocks pull-request runs when guarded provider secret env vars are pr
 For custom `apiKeyEnv` names, extend the guard list:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.4
+- uses: MG-ge/aici@v0.1.5
   env:
     AICI_PROVIDER_KEY: ${{ secrets.AICI_PROVIDER_KEY }}
   with:
@@ -100,7 +102,7 @@ Run `aici audit` before live checks if your repository has an approved provider 
 For the composite Action, prefer enforcing the same allowlist on the live run itself:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.4
+- uses: MG-ge/aici@v0.1.5
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

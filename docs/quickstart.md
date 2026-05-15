@@ -17,6 +17,8 @@ This creates:
 
 The first test is fixture-only. It does not call a model provider and should pass immediately.
 
+Fixture tests come first because they are cheap, deterministic, and reviewable in a PR. They prove the contract catches the failure you care about before live model behavior, provider latency, or API spend enter the loop.
+
 ## 2. Commit The Starter Files
 
 ```bash
@@ -47,7 +49,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: MG-ge/aici@v0.1.4
+      - uses: MG-ge/aici@v0.1.5
         with:
           config: aici.yml
           pr-comment: true
@@ -87,7 +89,7 @@ Do not run live checks with provider secrets against untrusted PR configs, promp
 For trusted live jobs:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.4
+- uses: MG-ge/aici@v0.1.5
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
@@ -97,6 +99,8 @@ For trusted live jobs:
 ```
 
 Use live checks for high-value prompts only. Keep most regression coverage fixture-based to avoid flaky CI and unnecessary model spend.
+
+For the full trusted workflow split, see [Trusted Live CI](./trusted-live-ci.md).
 
 ## 6. Audit Network Behavior
 

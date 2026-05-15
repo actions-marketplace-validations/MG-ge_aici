@@ -19,7 +19,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: MG-ge/aici@v0.1.4
+      - uses: MG-ge/aici@v0.1.5
         with:
           config: examples/basic/aici.yml
           report-dir: .aici
