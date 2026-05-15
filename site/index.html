@@ -865,16 +865,16 @@
   <main id="top">
     <section class="hero">
       <div class="wrap">
-        <div class="kicker"><span class="pip" aria-hidden="true"></span>v0.1.2 - open source - MIT</div>
+        <div class="kicker"><span class="pip" aria-hidden="true"></span>v0.1.4 - open source - MIT</div>
         <h1>Local-first AI quality gates for <em>pull requests.</em></h1>
         <p class="lede">Aici is a no-phone-home CLI and GitHub Action for prompt, JSON, tool-call, latency, and cost contracts. No telemetry. No Aici backend. Live checks call only the provider endpoint your config declares.</p>
 
         <div class="install" aria-label="Install command">
           <div class="cmd">
             <span class="prompt" aria-hidden="true">$</span>
-            <code>npx @mgicloud/aici init</code>
+            <code>npx @mgicloud/aici init --config aici.yml</code>
           </div>
-          <button class="copy" type="button" aria-label="Copy install command" data-copy="npx @mgicloud/aici init">Copy</button>
+          <button class="copy" type="button" aria-label="Copy install command" data-copy="npx @mgicloud/aici init --config aici.yml">Copy</button>
         </div>
         <div class="install-note">
           <span><span class="check">ok</span>10-minute setup</span>
@@ -1137,9 +1137,9 @@
         <div class="install" aria-label="Final install command">
           <div class="cmd">
             <span class="prompt" aria-hidden="true">$</span>
-            <code>npx @mgicloud/aici init &amp;&amp; npx @mgicloud/aici run</code>
+            <code>npx @mgicloud/aici init --config aici.yml &amp;&amp; npx @mgicloud/aici run --config aici.yml</code>
           </div>
-          <button class="copy" type="button" aria-label="Copy final install command" data-copy="npx @mgicloud/aici init && npx @mgicloud/aici run">Copy</button>
+          <button class="copy" type="button" aria-label="Copy final install command" data-copy="npx @mgicloud/aici init --config aici.yml && npx @mgicloud/aici run --config aici.yml">Copy</button>
         </div>
         <div class="install-note">
           <span><span class="check">ok</span>exits non-zero on regression</span>
@@ -1159,7 +1159,7 @@
         <a href="https://github.com/MG-ge/aici/blob/main/CHANGELOG.md">changelog</a>
         <a href="https://github.com/MG-ge/aici/blob/main/SECURITY.md">security</a>
       </div>
-      <div>aici - v0.1.2 - MIT - local-first AI quality gates</div>
+      <div>aici - v0.1.4 - MIT - local-first AI quality gates</div>
     </div>
   </footer>
 

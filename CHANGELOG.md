@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4 - 2026-05-15
+
+- Made `aici init` create a self-contained starter fixture, schema, and config that pass immediately outside this repository.
+- Fixed the composite GitHub Action to execute the bundled CLI from `github.action_path`, so `uses: MG-ge/aici@v0.1.x` works in external repositories.
+- Updated launch docs, quickstart, troubleshooting, examples, and site version copy for the published v0.1.4 readiness pass.
+- Added contribution guidance and packaged it with the npm release.
+
 ## 0.1.3 - 2026-05-15
 
 - Added endpoint allowlist enforcement to `aici run`, so live jobs can reject unapproved provider endpoints before provider API keys are read.

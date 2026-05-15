@@ -1,6 +1,6 @@
 # Release Checklist
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-15
 
 ## Before Publishing
 

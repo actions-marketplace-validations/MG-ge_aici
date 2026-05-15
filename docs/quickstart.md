@@ -2,74 +2,31 @@
 
 **Last updated:** 2026-05-15
 
-## 1. Install
-
-```bash
-npm install
-npm run build
-```
-
-For published usage:
+## 1. Create A Passing Fixture Test
 
 ```bash
 npx @mgicloud/aici init --config aici.yml
+npx @mgicloud/aici run --config aici.yml
 ```
 
-## 2. Create A Test
+This creates:
 
-```yaml
-$schema: ./schemas/aici.schema.json
-version: 1
-tests:
-  - name: support-response-schema
-    mockOutputFile: examples/basic/output.json
-    expect:
-      contains:
-        - approved
-      jsonSchema: examples/basic/schema.json
-```
+- `aici.yml`
+- `aici-example.output.json`
+- `aici-example.schema.json`
 
-Start with fixture tests. They make CI deterministic before you add live provider checks.
+The first test is fixture-only. It does not call a model provider and should pass immediately.
 
-## 3. Run Locally
+## 2. Commit The Starter Files
 
 ```bash
-npm run dev -- run --config examples/basic/aici.yml
+git add aici.yml aici-example.output.json aici-example.schema.json
+git commit -m "Add Aici quality gate"
 ```
 
-Reports are written to `.aici/aici-report.md`, `.aici/aici-report.json`, and `.aici/aici-report.html`.
+Keep broad pull-request coverage fixture-based first. Add live provider checks only after the local contract is stable.
 
-## 4. Add Live Provider Checks
-
-```bash
-npm run live:openai
-npm run live:openai-tool
-```
-
-The live OpenAI commands expect `OPENAI_API_KEY` in the environment.
-
-Use live checks for high-value prompts only. Keep most regression coverage fixture-based to avoid flaky CI and avoid unnecessary model spend.
-
-## 5. Audit Network Behavior
-
-```bash
-npx @mgicloud/aici audit --config aici.yml
-npx @mgicloud/aici audit --config aici.yml --json
-```
-
-Fixture-only configs show no provider endpoints. Live provider configs show the exact OpenAI, Anthropic, or OpenAI-compatible endpoint Aici may call. Aici has no telemetry and no remote Aici backend.
-
-For live CI jobs, enforce the endpoint allowlist on the run itself:
-
-```bash
-npx @mgicloud/aici run \
-  --config aici.yml \
-  --allow-provider-endpoint https://api.openai.com/v1/responses
-```
-
-If the config contains another provider endpoint, Aici exits before reading provider API keys or sending provider requests.
-
-## 6. Add GitHub Actions
+## 3. Add GitHub Actions
 
 ```yaml
 name: Aici
@@ -90,12 +47,62 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - uses: ./
+      - uses: MG-ge/aici@v0.1.4
         with:
           config: aici.yml
           pr-comment: true
 ```
 
-Store provider keys as GitHub Actions secrets. Do not commit `.env` files or raw API keys.
+For sensitive outputs, set `pr-comment: false` and review `.aici/aici-report.json` before enabling artifacts or comments.
 
-Keep pull-request workflows fixture-only for untrusted PRs. Run live provider checks with secrets only in trusted workflows, and set `allowed-provider-endpoints` for those jobs.
+## 4. Add A Live Provider Smoke Test
+
+OpenAI:
+
+```yaml
+version: 1
+provider:
+  type: openai
+  model: gpt-5.4-mini
+tests:
+  - name: support-response-live
+    prompt: Return {"decision":"approved","reason":"ok"} as JSON.
+    expect:
+      json: true
+      jsonSchema: aici-example.schema.json
+```
+
+Run it locally:
+
+```bash
+OPENAI_API_KEY=... npx @mgicloud/aici run \
+  --config aici.yml \
+  --allow-provider-endpoint https://api.openai.com/v1/responses
+```
+
+## 5. Use Secrets Only In Trusted Workflows
+
+Do not run live checks with provider secrets against untrusted PR configs, prompts, schemas, fixtures, or tool definitions.
+
+For trusted live jobs:
+
+```yaml
+- uses: MG-ge/aici@v0.1.4
+  env:
+    OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  with:
+    config: aici.yml
+    allow-provider-secrets: true
+    allowed-provider-endpoints: https://api.openai.com/v1/responses
+```
+
+Use live checks for high-value prompts only. Keep most regression coverage fixture-based to avoid flaky CI and unnecessary model spend.
+
+## 6. Audit Network Behavior
+
+```bash
+npx @mgicloud/aici audit --config aici.yml
+npx @mgicloud/aici audit --config aici.yml --json
+```
+
+Fixture-only configs show no provider endpoints. Live provider configs show the exact OpenAI, Anthropic, or OpenAI-compatible endpoint Aici may call. Aici has no telemetry and no remote Aici backend.

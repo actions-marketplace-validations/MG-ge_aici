@@ -1,6 +1,6 @@
 # Examples Guide
 
-**Last updated:** 2026-05-06
+**Last updated:** 2026-05-15
 
 Use this guide to choose the smallest useful Aici setup for your LLM workflow.
 
@@ -56,7 +56,7 @@ tests:
 Then wire it into GitHub Actions:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.2
+- uses: MG-ge/aici@v0.1.4
   with:
     config: aici.yml
 ```

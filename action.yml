@@ -11,11 +11,11 @@ inputs:
     required: false
     default: .aici
   install:
-    description: Run npm ci before executing the CLI.
+    description: Install this action's Node dependencies before executing the bundled CLI.
     required: false
     default: "true"
   build:
-    description: Run npm run build before executing the CLI.
+    description: Build this action's CLI before executing it. Disable only when using a release tag with committed dist files.
     required: false
     default: "true"
   comment:
@@ -49,11 +49,13 @@ runs:
     - name: Install dependencies
       if: ${{ inputs.install == 'true' }}
       shell: bash
+      working-directory: ${{ github.action_path }}
       run: npm ci
 
     - name: Build CLI
       if: ${{ inputs.build == 'true' }}
       shell: bash
+      working-directory: ${{ github.action_path }}
       run: npm run build
 
     - name: Guard provider secrets on pull requests
@@ -96,6 +98,7 @@ runs:
     - name: Run Aici
       shell: bash
       env:
+        AICI_ACTION_PATH: ${{ github.action_path }}
         AICI_CONFIG: ${{ inputs.config }}
         AICI_REPORT_DIR: ${{ inputs.report-dir }}
         AICI_COMMENT: ${{ inputs.comment }}
@@ -109,7 +112,7 @@ runs:
           endpoint_args+=(--allow-provider-endpoint "$endpoint")
         done
 
-        node dist/cli.js run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR" "${endpoint_args[@]}"
+        node "$AICI_ACTION_PATH/dist/cli.js" run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR" "${endpoint_args[@]}"
         status=$?
         echo "$status" > "$AICI_REPORT_DIR/exit-code"
 

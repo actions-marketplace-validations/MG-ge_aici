@@ -1,6 +1,6 @@
 {
   "name": "@mgicloud/aici",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Local-first AI quality gates for pull requests.",
   "type": "module",
   "homepage": "https://github.com/MG-ge/aici#readme",
@@ -23,6 +23,9 @@
     "ai",
     "ci",
     "github-action",
+    "ai-quality",
+    "llm-testing",
+    "local-first",
     "prompt-testing",
     "tool-calling"
   ],
@@ -34,6 +37,7 @@
     "docs",
     "README.md",
     "SECURITY.md",
+    "CONTRIBUTING.md",
     "LICENSE",
     "CHANGELOG.md",
     "action.yml"

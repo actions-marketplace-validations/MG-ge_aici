@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { writeFile } from "node:fs/promises";
+import { access, mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 import {
   assertAllowedProviderEndpoints,
   createAuditReport,
@@ -104,24 +105,61 @@ function parseOptions(args: string[]): CliOptions {
 
 async function initConfig(options: CliOptions): Promise<void> {
   const target = options.config ?? "aici.yml";
-  const sample = `$schema: ./schemas/aici.schema.json
-version: 1
-provider:
-  type: openai
-  model: gpt-5.4-mini
-  apiKeyEnv: OPENAI_API_KEY
+  const targetDir = path.dirname(path.resolve(target));
+  const outputFile = path.join(targetDir, "aici-example.output.json");
+  const schemaFile = path.join(targetDir, "aici-example.schema.json");
+  const writeFlag = options.force ? "w" : "wx";
+  const sample = `version: 1
 tests:
-  - name: example-json-output
-    mockOutputFile: examples/basic/output.json
+  - name: support-response-schema
+    mockOutputFile: aici-example.output.json
     expect:
-      jsonSchema: examples/basic/schema.json
+      json: true
+      jsonSchema: aici-example.schema.json
       contains:
         - approved
-      maxLatencyMs: 1000
 `;
 
-  await writeFile(target, sample, { flag: options.force ? "w" : "wx" });
+  if (!options.force) {
+    await assertDoesNotExist(target);
+    await assertDoesNotExist(outputFile);
+    await assertDoesNotExist(schemaFile);
+  }
+
+  await mkdir(targetDir, { recursive: true });
+  await writeFile(target, sample, { flag: writeFlag });
+  await writeFile(outputFile, `${JSON.stringify({
+    decision: "approved",
+    reason: "The response follows the contract.",
+  }, null, 2)}\n`, { flag: writeFlag });
+  await writeFile(schemaFile, `${JSON.stringify({
+    type: "object",
+    required: ["decision", "reason"],
+    additionalProperties: false,
+    properties: {
+      decision: {
+        enum: ["approved", "rejected"],
+      },
+      reason: {
+        type: "string",
+        minLength: 1,
+      },
+    },
+  }, null, 2)}\n`, { flag: writeFlag });
   console.log(`Created ${target}`);
+  console.log(`Created ${path.relative(process.cwd(), outputFile) || outputFile}`);
+  console.log(`Created ${path.relative(process.cwd(), schemaFile) || schemaFile}`);
+  console.log(`Run: aici run --config ${target}`);
+}
+
+async function assertDoesNotExist(target: string): Promise<void> {
+  try {
+    await access(target);
+  } catch {
+    return;
+  }
+
+  throw new Error(`${target} already exists. Use --force to overwrite.`);
 }
 
 function printSummary(passed: boolean, results: TestResult[], reportDir: string): void {
