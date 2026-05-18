@@ -1,5 +1,8 @@
 name: Aici
 description: Run LLM regression tests and fail pull requests when AI behavior regresses.
+branding:
+  icon: shield
+  color: yellow
 
 inputs:
   config:
