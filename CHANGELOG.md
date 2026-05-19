@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.9 - 2026-05-19
+
+- Printed the exact bundled Action CLI path during GitHub Action runs so logs prove release tags use `action-dist/cli.js`.
+- Made GitHub artifact upload opt-in by default; reports stay in the runner unless job summaries, PR comments, or artifacts are explicitly enabled.
+- Sharpened launch positioning around tiny no-phone-home PR contract gates for AI output.
+- Paused Dependabot version-update PR churn while GitHub Actions quota is constrained.
+
 ## 0.1.8 - 2026-05-19
 
 - Renamed the GitHub Action Marketplace listing from `Aici` to `Aici PR Gate` so Marketplace validation can pass with a globally unique action name.

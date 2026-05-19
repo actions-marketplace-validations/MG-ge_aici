@@ -1,12 +1,12 @@
 # Aici
 
-> Local-first AI quality gates for pull requests.
+> Tiny no-phone-home PR contract gates for AI output.
 
-**Status:** v0.1.8
-**Last updated:** 2026-05-15
+**Status:** v0.1.9
+**Last updated:** 2026-05-19
 **License:** MIT
 
-Aici is a no-phone-home CLI and GitHub Action for testing LLM outputs before a pull request merges. It checks prompt responses, JSON contracts, tool calls, cost, and latency from a repo-local `aici.yml`.
+Aici fails pull requests when LLM output contracts drift: JSON schema, text/regex, tool calls, latency, cost, and provider endpoints. It is a repo-local CLI and GitHub Action, not a broad eval platform.
 
 The core product is free and open source. There is no Aici backend, no telemetry, and no hosted prompt storage.
 
@@ -66,7 +66,7 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.8
+      - uses: MG-ge/aici@v0.1.9
         with:
           config: aici.yml
           pr-comment: true
@@ -74,12 +74,14 @@ jobs:
 
 Release tags use a bundled Action CLI and do not run `npm ci` or rebuild the project by default.
 
+No Aici backend is involved. The Action appends a GitHub job summary by default; PR comments and report artifacts are opt-in after you review report contents.
+
 Run live provider checks with secrets only from trusted branches, protected merge queues, scheduled jobs, or maintainer-approved workflows. Do not expose provider secrets to untrusted PR configs, prompts, schemas, fixtures, or tool definitions.
 
 For trusted live jobs, enforce endpoint allowlists:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.8
+- uses: MG-ge/aici@v0.1.9
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

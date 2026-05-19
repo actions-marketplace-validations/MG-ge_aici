@@ -30,9 +30,9 @@ inputs:
     required: false
     default: "false"
   upload-artifact:
-    description: Upload Markdown and JSON reports as a workflow artifact.
+    description: Upload Markdown and JSON reports as a workflow artifact. Opt in after reviewing report contents.
     required: false
-    default: "true"
+    default: "false"
   allow-provider-secrets:
     description: Allow live provider checks with provider API-key environment variables during pull_request or pull_request_target events. Set true only for trusted configs, prompts, schemas, and tool definitions.
     required: false
@@ -121,6 +121,7 @@ runs:
           cli_path="$AICI_ACTION_PATH/dist/cli.js"
         fi
 
+        echo "Using bundled Aici Action CLI: $cli_path"
         node "$cli_path" run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR" "${endpoint_args[@]}"
         status=$?
         echo "$status" > "$AICI_REPORT_DIR/exit-code"

@@ -17,8 +17,8 @@ Build once, with network access, so the image contains the published Aici CLI:
 ```bash
 docker build \
   -f examples/docker/Dockerfile.fixture \
-  --build-arg AICI_VERSION=0.1.8 \
-  -t aici-fixture:0.1.8 \
+  --build-arg AICI_VERSION=0.1.9 \
+  -t aici-fixture:0.1.9 \
   .
 ```
 
@@ -31,7 +31,7 @@ docker run --rm --network none \
   -v "$PWD:/work:ro" \
   -v "$PWD/.aici-docker:/reports" \
   -w /work \
-  aici-fixture:0.1.8 \
+  aici-fixture:0.1.9 \
   run --config aici.yml --report-dir /reports
 ```
 
@@ -44,7 +44,7 @@ docker run --rm --network none \
   -v "$PWD:/work:ro" \
   -v "$PWD/.aici-docker:/reports" \
   -w /work \
-  aici-fixture:0.1.8 \
+  aici-fixture:0.1.9 \
   run --config examples/basic/aici.yml --report-dir /reports
 ```
 
@@ -62,11 +62,11 @@ jobs:
       - uses: actions/checkout@v6
       - name: Build trusted Aici fixture image
         run: |
-          docker build --build-arg AICI_VERSION=0.1.8 \
-            -t aici-fixture:0.1.8 \
+          docker build --build-arg AICI_VERSION=0.1.9 \
+            -t aici-fixture:0.1.9 \
             - <<'DOCKERFILE'
           FROM node:22-alpine
-          ARG AICI_VERSION=0.1.8
+          ARG AICI_VERSION=0.1.9
           RUN npm install --global "@mgicloud/aici@${AICI_VERSION}" \
             && npm cache clean --force
           WORKDIR /work
@@ -79,7 +79,7 @@ jobs:
             -v "$PWD:/work:ro" \
             -v "$PWD/.aici-docker:/reports" \
             -w /work \
-            aici-fixture:0.1.8 \
+            aici-fixture:0.1.9 \
             run --config aici.yml --report-dir /reports
 ```
 

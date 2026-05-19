@@ -1,6 +1,6 @@
 # Trusted Live CI
 
-**Last updated:** 2026-05-15
+**Last updated:** 2026-05-19
 
 Use this pattern when live provider checks need API keys.
 
@@ -30,11 +30,10 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.8
+      - uses: MG-ge/aici@v0.1.9
         with:
           config: aici.yml
           pr-comment: true
-          upload-artifact: true
 ```
 
 This workflow should use `mockOutput`, `mockOutputFile`, `mockToolCalls`, or `mockToolCallsFile`. It should not expose `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, or other provider keys.
@@ -57,7 +56,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.8
+      - uses: MG-ge/aici@v0.1.9
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:

@@ -1,6 +1,6 @@
 FROM node:22-alpine
 
-ARG AICI_VERSION=0.1.8
+ARG AICI_VERSION=0.1.9
 
 RUN npm install --global "@mgicloud/aici@${AICI_VERSION}" \
   && npm cache clean --force

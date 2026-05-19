@@ -45,7 +45,7 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.8
+      - uses: MG-ge/aici@v0.1.9
         with:
           config: aici.yml
           pr-comment: true
@@ -85,7 +85,7 @@ Do not run live checks with provider secrets against untrusted PR configs, promp
 For trusted live jobs:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.8
+- uses: MG-ge/aici@v0.1.9
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

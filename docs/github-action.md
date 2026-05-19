@@ -1,6 +1,6 @@
 # GitHub Action
 
-**Last updated:** 2026-05-15
+**Last updated:** 2026-05-19
 
 ## Inputs
 
@@ -12,7 +12,7 @@
 | `build` | `false` | Development escape hatch to rebuild the CLI before execution |
 | `comment` | `true` | Append Markdown report to job summary |
 | `pr-comment` | `false` | Add/update sticky PR comment |
-| `upload-artifact` | `true` | Upload report directory |
+| `upload-artifact` | `false` | Upload report directory after reviewing report contents |
 | `allow-provider-secrets` | `false` | Permit live provider checks with provider API-key env vars during `pull_request` or `pull_request_target` events |
 | `provider-secret-envs` | `OPENAI_API_KEY ANTHROPIC_API_KEY` | Space or comma separated provider secret env var names guarded during pull-request events |
 | `allowed-provider-endpoints` | empty | Space or comma separated provider request URLs allowed during `run`; when set, Aici fails before provider secrets are read if the config contains any other endpoint |
@@ -30,12 +30,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.8
+      - uses: MG-ge/aici@v0.1.9
         with:
           config: aici.yml
 ```
 
 Release tags run the bundled Action CLI from `action-dist/cli.js`. They do not run `npm ci` or rebuild the TypeScript project by default.
+
+No Aici backend is involved. The Action appends a GitHub job summary by default; PR comments and report artifacts are opt-in after you review report contents.
 
 ## PR Comments
 
@@ -47,7 +49,7 @@ permissions:
 ```
 
 ```yaml
-- uses: MG-ge/aici@v0.1.8
+- uses: MG-ge/aici@v0.1.9
   with:
     config: aici.yml
     pr-comment: true
@@ -66,7 +68,7 @@ For a copy-paste two-workflow setup, see [Trusted Live CI](./trusted-live-ci.md)
 The Action blocks pull-request runs when guarded provider secret env vars are present unless `allow-provider-secrets: true` is set. Use that opt-in only after reviewing the config and every referenced prompt, schema, input, fixture, and tool definition.
 
 ```yaml
-- uses: MG-ge/aici@v0.1.8
+- uses: MG-ge/aici@v0.1.9
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
@@ -77,7 +79,7 @@ The Action blocks pull-request runs when guarded provider secret env vars are pr
 For custom `apiKeyEnv` names, extend the guard list:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.8
+- uses: MG-ge/aici@v0.1.9
   env:
     AICI_PROVIDER_KEY: ${{ secrets.AICI_PROVIDER_KEY }}
   with:
@@ -100,7 +102,7 @@ Run `aici audit` before live checks if your repository has an approved provider 
 For the composite Action, prefer enforcing the same allowlist on the live run itself:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.8
+- uses: MG-ge/aici@v0.1.9
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
