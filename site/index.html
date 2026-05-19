@@ -504,10 +504,11 @@
       background: var(--paper);
       box-shadow: var(--shadow-lg);
     }
-    .demo-shot img {
+    .demo-shot img,
+    .demo-shot video {
       display: block;
       width: 100%;
-      aspect-ratio: 16 / 10;
+      aspect-ratio: 16 / 9;
       object-fit: contain;
       background: var(--paper-2);
     }
@@ -971,7 +972,18 @@
         <p class="section-lede">The launch page carries concrete product states: local CLI failure, pull-request failure, and the HTML report artifact a developer gets after a run.</p>
 
         <figure class="demo-shot">
-          <img src="/assets/aici-demo.gif" width="720" height="450" alt="Animated Aici demo cycling through a local CLI failure, GitHub Action failure, and HTML report artifact">
+          <video
+            src="/assets/aici-pr-gate-proof.mp4"
+            poster="/assets/og-card.png"
+            width="1920"
+            height="1080"
+            autoplay
+            muted
+            loop
+            playsinline
+            controls
+            aria-label="Animated Aici proof video showing local CLI failure, GitHub Action failure, and report artifact"
+          ></video>
         </figure>
 
         <div class="proof-grid">

@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aici PR Gate Proof Video</title>
+  <style>
+    :root {
+      --paper: #f8f5ee;
+      --paper-2: #eee8dc;
+      --ink: #202632;
+      --muted: #667085;
+      --line: #ddd7cb;
+      --pass: #158455;
+      --fail: #c2412d;
+      --term: #202632;
+      --white: #fffdf8;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+
+    #aici-proof {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(32, 38, 50, 0.035) 1px, transparent 1px) 0 0 / 96px 100%,
+        radial-gradient(circle at 12% 18%, rgba(21, 132, 85, 0.10), transparent 26%),
+        radial-gradient(circle at 88% 78%, rgba(194, 65, 45, 0.09), transparent 28%),
+        var(--paper);
+    }
+
+    .rule {
+      position: absolute;
+      left: 96px;
+      right: 96px;
+      height: 1px;
+      background: var(--line);
+      opacity: 0.9;
+    }
+
+    .rule.top { top: 72px; }
+    .rule.bottom { bottom: 72px; }
+
+    .brand {
+      position: absolute;
+      top: 42px;
+      left: 96px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font: 700 26px/1 "JetBrains Mono", ui-monospace, monospace;
+      letter-spacing: -0.02em;
+      z-index: 20;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 9px;
+      background: var(--ink);
+      color: var(--paper);
+      font: 800 20px/1 "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      opacity: 0;
+      padding: 132px 96px 104px;
+      z-index: 5;
+    }
+
+    .scene.visible { opacity: 1; }
+
+    .hero {
+      align-items: center;
+      justify-content: space-between;
+      gap: 92px;
+    }
+
+    .copy {
+      width: 720px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .eyebrow {
+      width: max-content;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 253, 248, 0.72);
+      padding: 12px 18px;
+      font: 700 22px/1 "JetBrains Mono", ui-monospace, monospace;
+      color: var(--muted);
+      letter-spacing: 0;
+    }
+
+    h1, h2, p { margin: 0; }
+
+    h1 {
+      font-size: 92px;
+      line-height: 0.96;
+      letter-spacing: 0;
+      max-width: 760px;
+    }
+
+    h2 {
+      font-size: 62px;
+      line-height: 1.02;
+      letter-spacing: 0;
+      max-width: 760px;
+    }
+
+    .sub {
+      font-size: 31px;
+      line-height: 1.34;
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    .proof-shell {
+      position: relative;
+      width: 950px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--white);
+      box-shadow: 0 34px 90px rgba(32, 38, 50, 0.14);
+      overflow: hidden;
+    }
+
+    .proof-shell img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .caption-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      background: rgba(248, 245, 238, 0.94);
+      padding: 16px 20px;
+      font: 700 19px/1 "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      font: 700 18px/1 "JetBrains Mono", ui-monospace, monospace;
+      background: rgba(194, 65, 45, 0.12);
+      color: var(--fail);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .stack {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 0.82fr 1.18fr;
+      gap: 54px;
+      align-items: center;
+    }
+
+    .shot {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .shot .proof-shell { width: 100%; }
+
+    .callout-list {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 8px;
+    }
+
+    .callout {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 253, 248, 0.78);
+      padding: 20px 22px;
+      font-size: 25px;
+      line-height: 1.24;
+      color: var(--ink);
+    }
+
+    .callout strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 25px;
+      line-height: 1.1;
+    }
+
+    .check {
+      flex: 0 0 auto;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(21, 132, 85, 0.12);
+      color: var(--pass);
+      font: 800 20px/1 "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    .x {
+      background: rgba(194, 65, 45, 0.12);
+      color: var(--fail);
+    }
+
+    .end {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .end-card {
+      width: min(1160px, 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 28px;
+      padding: 66px 72px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background: rgba(255, 253, 248, 0.84);
+      box-shadow: 0 34px 90px rgba(32, 38, 50, 0.11);
+    }
+
+    .terminal {
+      width: 760px;
+      text-align: left;
+      border-radius: 16px;
+      background: var(--term);
+      color: #f8f5ee;
+      padding: 24px 28px;
+      font: 500 22px/1.52 "JetBrains Mono", ui-monospace, monospace;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .green { color: #5ed59b; }
+    .red { color: #ff8b78; }
+  </style>
+</head>
+<body>
+  <div
+    id="aici-proof"
+    data-composition-id="aici-proof"
+    data-width="1920"
+    data-height="1080"
+    data-start="0"
+    data-duration="18"
+    data-track-index="0"
+  >
+    <div class="rule top"></div>
+    <div class="rule bottom"></div>
+    <div class="brand"><span class="mark">A</span><span>Aici PR Gate</span></div>
+
+    <section class="scene scene-1 hero visible">
+      <div class="copy">
+        <div class="eyebrow">local-first / no backend / no telemetry</div>
+        <h1>Fail the PR when AI output contracts drift.</h1>
+        <p class="sub">A tiny no-phone-home gate for JSON, tool calls, latency, cost, and provider endpoints.</p>
+      </div>
+      <div class="proof-shell">
+        <div class="caption-bar"><span>Proof asset</span><span class="pill"><span class="dot"></span> real reports</span></div>
+        <img src="../../site/assets/og-card.png" alt="Aici Open Graph proof card">
+      </div>
+    </section>
+
+    <section class="scene scene-2">
+      <div class="stack">
+        <div class="copy">
+          <div class="eyebrow">1 / local fail</div>
+          <h2>The contract breaks before merge.</h2>
+          <p class="sub">Fixture-first checks run without provider secrets, so untrusted pull requests can fail safely.</p>
+        </div>
+        <div class="shot">
+          <div class="proof-shell">
+            <div class="caption-bar"><span>CLI failing locally</span><span class="pill"><span class="dot"></span> exit 1</span></div>
+            <img src="../../site/assets/cli-failing-local.png" alt="Aici CLI failing locally">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene scene-3">
+      <div class="stack">
+        <div class="copy">
+          <div class="eyebrow">2 / blocked PR</div>
+          <h2>The GitHub check blocks the unsafe change.</h2>
+          <p class="sub">The failure state is the product: small, deterministic, and reviewer-readable.</p>
+        </div>
+        <div class="shot">
+          <div class="proof-shell">
+            <div class="caption-bar"><span>GitHub Action proof</span><span class="pill"><span class="dot"></span> merge blocked</span></div>
+            <img src="../../site/assets/github-action-failing-pr.png" alt="Aici GitHub Action failing a pull request">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene scene-4">
+      <div class="stack">
+        <div class="copy">
+          <div class="eyebrow">3 / report artifact</div>
+          <h2>The report explains exactly what failed.</h2>
+          <p class="sub">Markdown, JSON, and HTML outputs are generated locally. Artifact upload is opt-in.</p>
+        </div>
+        <div class="shot">
+          <div class="proof-shell">
+            <div class="caption-bar"><span>HTML / Markdown report</span><span class="pill"><span class="dot"></span> no Aici server</span></div>
+            <img src="../../site/assets/report-artifact.png" alt="Aici report artifact">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="scene scene-5 end">
+      <div class="end-card copy">
+        <div class="eyebrow">small enough to audit</div>
+        <h2>Aici is a PR contract gate, not an eval platform.</h2>
+        <div class="terminal">
+          <div><span class="green">PASS</span> fixture checks need no provider keys</div>
+          <div><span class="green">PASS</span> no telemetry or hosted backend</div>
+          <div><span class="red">FAIL</span> unexpected endpoints before secrets are read</div>
+        </div>
+      </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const scenes = [".scene-1", ".scene-2", ".scene-3", ".scene-4", ".scene-5"];
+
+      scenes.forEach((scene, index) => {
+        if (index > 0) {
+          tl.set(scene, { opacity: 1 }, index * 3.4);
+          tl.from(`${scene} .copy`, { y: 32, opacity: 0, duration: 0.45, ease: "power3.out" }, index * 3.4 + 0.08);
+          tl.from(`${scene} .proof-shell, ${scene} .end-card`, { y: 34, scale: 0.985, opacity: 0, duration: 0.55, ease: "power3.out" }, index * 3.4 + 0.18);
+        }
+        if (index < scenes.length - 1) {
+          tl.to(scene, { y: -22, opacity: 0, duration: 0.38, ease: "power2.in" }, index * 3.4 + 3.02);
+        }
+      });
+
+      tl.from(".scene-1 .eyebrow", { y: 22, opacity: 0, duration: 0.45, ease: "power3.out" }, 0.15);
+      tl.from(".scene-1 h1", { y: 36, opacity: 0, duration: 0.55, ease: "power3.out" }, 0.28);
+      tl.from(".scene-1 .sub", { y: 28, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.42);
+      tl.from(".scene-1 .proof-shell", { x: 42, scale: 0.985, opacity: 0, duration: 0.62, ease: "power3.out" }, 0.52);
+      tl.from(".brand", { y: -16, opacity: 0, duration: 0.4, ease: "power2.out" }, 0);
+      tl.from(".rule", { scaleX: 0, transformOrigin: "left center", duration: 0.65, ease: "power2.out" }, 0.06);
+
+      window.__timelines["aici-proof"] = tl;
+    </script>
+  </div>
+</body>
+</html>
