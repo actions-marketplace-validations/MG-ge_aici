@@ -155,6 +155,7 @@ Reports may include model outputs and normalized tool-call arguments. Use `redac
 | [Network Audit](./docs/network-audit.md) | Endpoint audit, allowlists, and provider/judge boundaries |
 | [Security](./docs/security.md) | Redaction, secrets, artifacts, and CI guidance |
 | [Troubleshooting](./docs/troubleshooting.md) | Common install, config, provider, and CI failures |
+| [Roadmap](./docs/roadmap.md) | Current scope, near-term work, and explicit non-goals |
 | [Release Checklist](./docs/release-checklist.md) | Checks before publishing |
 
 ## Development
