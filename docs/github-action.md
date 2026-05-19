@@ -8,8 +8,8 @@
 |---|---|---|
 | `config` | `aici.yml` | Path to config file |
 | `report-dir` | `.aici` | Output directory for reports |
-| `install` | `true` | Install this action's Node dependencies |
-| `build` | `true` | Build this action's CLI before execution; keep enabled for branch refs, disable only for trusted release tags if you want faster runs |
+| `install` | `false` | Development escape hatch to run `npm ci` inside the action checkout |
+| `build` | `false` | Development escape hatch to rebuild the CLI before execution |
 | `comment` | `true` | Append Markdown report to job summary |
 | `pr-comment` | `false` | Add/update sticky PR comment |
 | `upload-artifact` | `true` | Upload report directory |
@@ -30,14 +30,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-      - uses: MG-ge/aici@v0.1.6
+      - uses: MG-ge/aici@v0.1.7
         with:
           config: aici.yml
 ```
+
+Release tags run the bundled Action CLI from `action-dist/cli.js`. They do not run `npm ci` or rebuild the TypeScript project by default.
 
 ## PR Comments
 
@@ -49,7 +47,7 @@ permissions:
 ```
 
 ```yaml
-- uses: MG-ge/aici@v0.1.6
+- uses: MG-ge/aici@v0.1.7
   with:
     config: aici.yml
     pr-comment: true
@@ -68,7 +66,7 @@ For a copy-paste two-workflow setup, see [Trusted Live CI](./trusted-live-ci.md)
 The Action blocks pull-request runs when guarded provider secret env vars are present unless `allow-provider-secrets: true` is set. Use that opt-in only after reviewing the config and every referenced prompt, schema, input, fixture, and tool definition.
 
 ```yaml
-- uses: MG-ge/aici@v0.1.6
+- uses: MG-ge/aici@v0.1.7
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:
@@ -79,7 +77,7 @@ The Action blocks pull-request runs when guarded provider secret env vars are pr
 For custom `apiKeyEnv` names, extend the guard list:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.6
+- uses: MG-ge/aici@v0.1.7
   env:
     AICI_PROVIDER_KEY: ${{ secrets.AICI_PROVIDER_KEY }}
   with:
@@ -102,7 +100,7 @@ Run `aici audit` before live checks if your repository has an approved provider 
 For the composite Action, prefer enforcing the same allowlist on the live run itself:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.6
+- uses: MG-ge/aici@v0.1.7
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.7 - 2026-05-19
+
+- Bundled the GitHub Action CLI into `action-dist/cli.js` so release tags run without default `npm ci` or build steps.
+- Changed the GitHub Action `install` and `build` inputs to development escape hatches that default to `false`.
+- Shifted landing-page commercial positioning from hosted history toward paid setup and trust packs.
+
 ## 0.1.6 - 2026-05-15
 
 - Added Docker strict-mode guidance and a fixture image for running deterministic Aici checks with `--network none`.

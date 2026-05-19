@@ -2,7 +2,7 @@
 
 > Local-first AI quality gates for pull requests.
 
-**Status:** v0.1.6
+**Status:** v0.1.7
 **Last updated:** 2026-05-15
 **License:** MIT
 
@@ -66,22 +66,20 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-      - uses: MG-ge/aici@v0.1.6
+      - uses: MG-ge/aici@v0.1.7
         with:
           config: aici.yml
           pr-comment: true
 ```
+
+Release tags use a bundled Action CLI and do not run `npm ci` or rebuild the project by default.
 
 Run live provider checks with secrets only from trusted branches, protected merge queues, scheduled jobs, or maintainer-approved workflows. Do not expose provider secrets to untrusted PR configs, prompts, schemas, fixtures, or tool definitions.
 
 For trusted live jobs, enforce endpoint allowlists:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.6
+- uses: MG-ge/aici@v0.1.7
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

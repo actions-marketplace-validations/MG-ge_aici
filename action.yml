@@ -14,13 +14,13 @@ inputs:
     required: false
     default: .aici
   install:
-    description: Install this action's Node dependencies before executing the bundled CLI.
+    description: Install this action's Node dependencies before executing the CLI. Development escape hatch only; release tags use the bundled action artifact.
     required: false
-    default: "true"
+    default: "false"
   build:
-    description: Build this action's CLI before executing it. Disable only when using a release tag with committed dist files.
+    description: Build this action's CLI before executing it. Development escape hatch only; release tags use the bundled action artifact.
     required: false
-    default: "true"
+    default: "false"
   comment:
     description: Add the Markdown report to the GitHub job summary.
     required: false
@@ -106,6 +106,7 @@ runs:
         AICI_REPORT_DIR: ${{ inputs.report-dir }}
         AICI_COMMENT: ${{ inputs.comment }}
         AICI_ALLOWED_PROVIDER_ENDPOINTS: ${{ inputs.allowed-provider-endpoints }}
+        AICI_BUILD: ${{ inputs.build }}
       run: |
         set +e
         mkdir -p -- "$AICI_REPORT_DIR"
@@ -115,7 +116,12 @@ runs:
           endpoint_args+=(--allow-provider-endpoint "$endpoint")
         done
 
-        node "$AICI_ACTION_PATH/dist/cli.js" run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR" "${endpoint_args[@]}"
+        cli_path="$AICI_ACTION_PATH/action-dist/cli.js"
+        if [ "$AICI_BUILD" = "true" ]; then
+          cli_path="$AICI_ACTION_PATH/dist/cli.js"
+        fi
+
+        node "$cli_path" run --config "$AICI_CONFIG" --report-dir "$AICI_REPORT_DIR" "${endpoint_args[@]}"
         status=$?
         echo "$status" > "$AICI_REPORT_DIR/exit-code"
 
