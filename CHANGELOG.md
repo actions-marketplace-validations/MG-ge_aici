@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8 - 2026-05-19
+
+- Renamed the GitHub Action Marketplace listing from `Aici` to `Aici PR Gate` so Marketplace validation can pass with a globally unique action name.
+
 ## 0.1.7 - 2026-05-19
 
 - Bundled the GitHub Action CLI into `action-dist/cli.js` so release tags run without default `npm ci` or build steps.

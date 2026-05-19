@@ -30,7 +30,7 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.7
+      - uses: MG-ge/aici@v0.1.8
         with:
           config: aici.yml
           pr-comment: true
@@ -57,7 +57,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.7
+      - uses: MG-ge/aici@v0.1.8
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         with:

@@ -1,4 +1,4 @@
-name: Aici
+name: Aici PR Gate
 description: Run LLM regression tests and fail pull requests when AI behavior regresses.
 branding:
   icon: shield

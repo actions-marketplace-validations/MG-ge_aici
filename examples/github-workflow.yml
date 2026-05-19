@@ -1,4 +1,4 @@
-name: Aici
+name: Aici PR Gate
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.7
+      - uses: MG-ge/aici@v0.1.8
         with:
           config: examples/basic/aici.yml
           report-dir: .aici

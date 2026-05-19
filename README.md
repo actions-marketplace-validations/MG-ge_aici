@@ -2,7 +2,7 @@
 
 > Local-first AI quality gates for pull requests.
 
-**Status:** v0.1.7
+**Status:** v0.1.8
 **Last updated:** 2026-05-15
 **License:** MIT
 
@@ -52,7 +52,7 @@ tests:
 For broad pull-request coverage, start fixture-only:
 
 ```yaml
-name: Aici
+name: Aici PR Gate
 
 on:
   pull_request:
@@ -66,7 +66,7 @@ jobs:
       issues: write
     steps:
       - uses: actions/checkout@v6
-      - uses: MG-ge/aici@v0.1.7
+      - uses: MG-ge/aici@v0.1.8
         with:
           config: aici.yml
           pr-comment: true
@@ -79,7 +79,7 @@ Run live provider checks with secrets only from trusted branches, protected merg
 For trusted live jobs, enforce endpoint allowlists:
 
 ```yaml
-- uses: MG-ge/aici@v0.1.7
+- uses: MG-ge/aici@v0.1.8
   env:
     OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   with:

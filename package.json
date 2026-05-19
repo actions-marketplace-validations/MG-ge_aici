@@ -1,6 +1,6 @@
 {
   "name": "@mgicloud/aici",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Local-first AI quality gates for pull requests.",
   "type": "module",
   "homepage": "https://github.com/MG-ge/aici#readme",
